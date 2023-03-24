@@ -1,0 +1,23 @@
+{
+  "name": "calyptus_capstone",
+  "version": "1.0.0",
+  "description": "Write a smart contract that implements a voting system, with functions to - add candidates,  - start the voting process by admin, - vote for a candidate,  - end the voting process by admin, - retrieve the number of votes for each candidate, - retrieve the winning candidate.",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/olegsinavski/calyptus_capstone.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/olegsinavski/calyptus_capstone/issues"
+  },
+  "homepage": "https://github.com/olegsinavski/calyptus_capstone#readme",
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^2.0.2",
+    "hardhat": "^2.13.0"
+  }
+}
