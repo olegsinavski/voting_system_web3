@@ -18,12 +18,20 @@ OR
 Write a separate script with Ethers.js to interact with the smart contract functions.
 Include a readme file.
 
-# How to set the repo up
+# How to set the repo from scratch
 ```
 npm init
 npm install --save-dev hardhat
 npx hardhat
 ```
+This will install all npm and hardhat configs.
+
+# Then, if you check it out you should run
+```
+npm install
+```
+
+# After that you can run hardhat commands
 
 ```
 npx hardhat compile
