@@ -15,5 +15,8 @@
   "bugs": {
     "url": "https://github.com/olegsinavski/calyptus_capstone/issues"
   },
-  "homepage": "https://github.com/olegsinavski/calyptus_capstone#readme"
+  "homepage": "https://github.com/olegsinavski/calyptus_capstone#readme",
+  "devDependencies": {
+    "hardhat": "^2.13.0"
+  }
 }
