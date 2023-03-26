@@ -1,7 +1,4 @@
-const {
-  time,
-  loadFixture,
-} = require("@nomicfoundation/hardhat-network-helpers");
+const { loadFixture } = require("@nomicfoundation/hardhat-network-helpers");
 const { anyValue } = require("@nomicfoundation/hardhat-chai-matchers/withArgs");
 const { expect } = require("chai");
 
@@ -12,12 +9,12 @@ describe("VotingSystem", function () {
   // and reset Hardhat Network to that snapshot in every test.
   async function deployVotingSystem() {
     // Contracts are deployed using the first signer/account by default
-    const [owner, otherAccount] = await ethers.getSigners();
+    const [owner, otherAccount, thirdAccount] = await ethers.getSigners();
 
     const VotingSystem = await ethers.getContractFactory("VotingSystem");
     const votingSystem = await VotingSystem.deploy();
 
-    return { votingSystem, owner, otherAccount };
+    return { votingSystem, owner, otherAccount, thirdAccount };
   }
 
   describe("State transition", function () {
@@ -81,8 +78,6 @@ describe("VotingSystem", function () {
       const { votingSystem, owner, otherAccount } = await loadFixture(deployVotingSystem);
       
       await expect(votingSystem.addCandidate(otherAccount.address)).not.to.be.reverted;
-      await expect(votingSystem.connect(otherAccount).addCandidate(owner.address)).not.to.be.reverted;
-
       await expect(votingSystem.startVoting()).not.to.be.reverted;
 
       await expect(votingSystem.addCandidate(otherAccount.address)).to.be.revertedWith(
@@ -138,6 +133,11 @@ describe("VotingSystem", function () {
       await expect(votingSystem.vote(otherAccount.address)).to.be.revertedWith(
         "Candidate is not registered"
       );
+
+      await expect(votingSystem.getCandidateVotes(otherAccount.address)).to.be.revertedWith(
+        "Candidate is not registered"
+      );
+
     });
 
     it("Voting and states", async function () {
@@ -156,74 +156,104 @@ describe("VotingSystem", function () {
       );
     });
 
-    
+    it("Two candidates", async function () {
+      const { votingSystem, owner, otherAccount, thirdAccount } = await loadFixture(deployVotingSystem);
+      
+      await expect(votingSystem.addCandidate(otherAccount.address)).not.to.be.reverted;
+      await expect(votingSystem.connect(otherAccount).addCandidate(owner.address)).not.to.be.reverted;
 
+      await expect(votingSystem.startVoting()).not.to.be.reverted;
+
+      await expect(votingSystem.vote(otherAccount.address)).not.to.be.reverted;
+      await expect(votingSystem.connect(otherAccount).vote(owner.address)).not.to.be.reverted;
+      await expect(votingSystem.connect(thirdAccount).vote(owner.address)).not.to.be.reverted;
+
+      expect(await votingSystem.getCandidateVotes(otherAccount.address)).to.equal(1);
+      expect(await votingSystem.getCandidateVotes(owner.address)).to.equal(2);
+     
+    });
 
   });
 
-  // describe("Withdrawals", function () {
-  //   describe("Validations", function () {
-  //     it("Should revert with the right error if called too soon", async function () {
-  //       const { lock } = await loadFixture(deployOneYearLockFixture);
+  describe("Winners", function() {
 
-  //       await expect(lock.withdraw()).to.be.revertedWith(
-  //         "You can't withdraw yet"
-  //       );
-  //     });
+    it("Getting winner", async function () {
+      const { votingSystem, owner, otherAccount, thirdAccount } = await loadFixture(deployVotingSystem);
+      
+      await expect(votingSystem.addCandidate(otherAccount.address)).not.to.be.reverted;
 
-  //     it("Should revert with the right error if called from another account", async function () {
-  //       const { lock, unlockTime, otherAccount } = await loadFixture(
-  //         deployOneYearLockFixture
-  //       );
+      await expect(votingSystem.currentWinner()).to.be.revertedWith(
+        "Voting hasn't started"
+      );
+    
+      await expect(votingSystem.startVoting()).not.to.be.reverted;
 
-  //       // We can increase the time in Hardhat Network
-  //       await time.increaseTo(unlockTime);
+      await expect(votingSystem.vote(otherAccount.address)).not.to.be.reverted;
 
-  //       // We use lock.connect() to send a transaction from another account
-  //       await expect(lock.connect(otherAccount).withdraw()).to.be.revertedWith(
-  //         "You aren't the owner"
-  //       );
-  //     });
+      expect(await votingSystem.currentWinner()).to.equal(otherAccount.address);
+      await expect(votingSystem.finishVoting()).not.to.be.reverted;
+      expect(await votingSystem.currentWinner()).to.equal(otherAccount.address);
 
-  //     it("Shouldn't fail if the unlockTime has arrived and the owner calls it", async function () {
-  //       const { lock, unlockTime } = await loadFixture(
-  //         deployOneYearLockFixture
-  //       );
+    }); 
 
-  //       // Transactions are sent using the first signer by default
-  //       await time.increaseTo(unlockTime);
+    it("Getting winner - no votes", async function () {
+      const { votingSystem, owner, otherAccount, thirdAccount } = await loadFixture(deployVotingSystem);
+      
+      await expect(votingSystem.addCandidate(otherAccount.address)).not.to.be.reverted;
 
-  //       await expect(lock.withdraw()).not.to.be.reverted;
-  //     });
-  //   });
+      await expect(votingSystem.startVoting()).not.to.be.reverted;
 
-  //   describe("Events", function () {
-  //     it("Should emit an event on withdrawals", async function () {
-  //       const { lock, unlockTime, lockedAmount } = await loadFixture(
-  //         deployOneYearLockFixture
-  //       );
+      await expect(votingSystem.currentWinner()).to.be.revertedWith(
+        "No votes has been casted"
+      );
 
-  //       await time.increaseTo(unlockTime);
+      await expect(votingSystem.finishVoting()).not.to.be.reverted;
 
-  //       await expect(lock.withdraw())
-  //         .to.emit(lock, "Withdrawal")
-  //         .withArgs(lockedAmount, anyValue); // We accept any value as `when` arg
-  //     });
-  //   });
+      await expect(votingSystem.currentWinner()).to.be.revertedWith(
+        "No votes has been casted"
+      );
+    });
+    
+    it("Two candidates", async function () {
+      const { votingSystem, owner, otherAccount, thirdAccount } = await loadFixture(deployVotingSystem);
+      
+      await expect(votingSystem.addCandidate(otherAccount.address)).not.to.be.reverted;
+      await expect(votingSystem.connect(otherAccount).addCandidate(owner.address)).not.to.be.reverted;
 
-  //   describe("Transfers", function () {
-  //     it("Should transfer the funds to the owner", async function () {
-  //       const { lock, unlockTime, lockedAmount, owner } = await loadFixture(
-  //         deployOneYearLockFixture
-  //       );
+      await expect(votingSystem.startVoting()).not.to.be.reverted;
 
-  //       await time.increaseTo(unlockTime);
+      await expect(votingSystem.connect(thirdAccount).vote(owner.address)).not.to.be.reverted;
+      await expect(votingSystem.vote(otherAccount.address)).not.to.be.reverted;
+      await expect(votingSystem.connect(otherAccount).vote(owner.address)).not.to.be.reverted;
+      
+      expect(await votingSystem.currentWinner()).to.equal(owner.address);
 
-  //       await expect(lock.withdraw()).to.changeEtherBalances(
-  //         [owner, lock],
-  //         [lockedAmount, -lockedAmount]
-  //       );
-  //     });
-  //   });
-  // });
+      await expect(votingSystem.finishVoting()).not.to.be.reverted;
+
+      expect(await votingSystem.currentWinner()).to.equal(owner.address);
+
+    }); 
+
+
+    it("Tie - goes to the first", async function () {
+      const { votingSystem, owner, otherAccount, thirdAccount } = await loadFixture(deployVotingSystem);
+      
+      await expect(votingSystem.addCandidate(otherAccount.address)).not.to.be.reverted;
+      await expect(votingSystem.connect(otherAccount).addCandidate(owner.address)).not.to.be.reverted;
+
+      await expect(votingSystem.startVoting()).not.to.be.reverted;
+
+      await expect(votingSystem.vote(otherAccount.address)).not.to.be.reverted;
+      await expect(votingSystem.connect(thirdAccount).vote(owner.address)).not.to.be.reverted;
+
+      expect(await votingSystem.currentWinner()).to.equal(otherAccount.address);
+
+      await expect(votingSystem.finishVoting()).not.to.be.reverted;
+
+      expect(await votingSystem.currentWinner()).to.equal(otherAccount.address);
+
+    }); 
+
+  });
+
 });

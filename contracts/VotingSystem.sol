@@ -10,7 +10,8 @@ contract VotingSystem is Ownable {
     mapping(address => uint) public candidates;
     mapping(address => bool) voters;
     uint256 public winnerVotes;
-    address public winner; 
+    address public winner;
+
     bool public started;
     bool public finished;
 
@@ -47,13 +48,26 @@ contract VotingSystem is Ownable {
     function vote(address candidate) public {
         require(started == true, "Voting hasn't started or finished");
         require(voters[msg.sender] == false, "You already voted");
-        require(candidates[candidate] > 0, "Candidate is not registered");
+        uint256 votes = candidates[candidate];
+        require(votes > 0, "Candidate is not registered");
         candidates[candidate] += 1;
         voters[msg.sender] = true;
+
+        votes += 1;
+        if (votes > winnerVotes) {
+            winner = candidate;
+            winnerVotes = votes;
+        }
     }
 
     function voted() public view returns(bool) {
         return voters[msg.sender];
+    }
+
+    function currentWinner() public view returns(address) {
+        require(started == true || finished == true, "Voting hasn't started");
+        require(winner != address(0), "No votes has been casted");
+        return winner;
     }
 
 }
