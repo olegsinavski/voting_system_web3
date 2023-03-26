@@ -51,9 +51,17 @@ npm install --save-dev @nomiclabs/hardhat-waffle ethereum-waffle chai @nomiclabs
 npm install @ethersproject/providers @openzeppelin/contracts
 ```
 
-
+## Run hardhat node
 ```
 npx hardhat node
+```
+## Deploy the contract
+```
+npx hardhat run scripts/deploy.js --network localhost
+```
+## Run the frontend
+```
+npm start
 ```
 
 

@@ -3,8 +3,8 @@ import './App.css';
 
 import { ethers } from 'ethers';
 import { Contract } from 'ethers';
-import contractABI from '../artifacts/contracts/VotingSystem.sol/VotingSystem.json';
-
+import { useState, useEffect } from 'react';
+import contractABI from './artifacts/contracts/VotingSystem.sol/VotingSystem.json';
 
 function App() {
   const provider = new ethers.providers.JsonRpcProvider('http://127.0.0.1:8545');

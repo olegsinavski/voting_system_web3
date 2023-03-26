@@ -1,4 +1,5 @@
 require("@nomicfoundation/hardhat-toolbox");
+// require("@nomiclabs/hardhat-react");
 
 /** @type import('hardhat/config').HardhatUserConfig */
 module.exports = {
@@ -9,6 +10,9 @@ module.exports = {
       url: "http://127.0.0.1:8545"
     }
   },
+  paths: {
+    artifacts: "./src/artifacts",
+  },
   // paths: {
   //   // ...
   //   client: './frontend/build'
@@ -18,9 +22,6 @@ module.exports = {
   //   // This will create a new build folder inside your client directory
   //   buildDir: './frontend/build',
   //   // Specify the location of your index.html file
-  //   html: {
-  //     template: './frontend/public/index.html'
-  //   },
   //   // Specify the location of your index.js file
   //   jsEntry: './frontend/index.js',
   //   // Specify the location of your contracts
@@ -29,4 +30,12 @@ module.exports = {
   //   // You will need to change this to the name of your own contract
   //   contractName: 'VotingSystem'
   // }
+
+  // react: {
+  //   outputDir: "./frontend/src/contracts",
+  //   solcVersion: "0.8.9",
+  //   // Specify the patterns for the solidity files to include or exclude
+  //   include: "./contracts/**",
+  //   exclude: "./contracts/migrations/**",
+  // },
 };
