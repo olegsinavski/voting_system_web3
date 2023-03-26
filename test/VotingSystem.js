@@ -20,7 +20,7 @@ describe("VotingSystem", function () {
     return { votingSystem, owner, otherAccount };
   }
 
-  describe("Deployment", function () {
+  describe("State transition", function () {
     it("Should set the right owner", async function () {
       const { votingSystem, owner } = await loadFixture(deployVotingSystem);
 
@@ -30,6 +30,7 @@ describe("VotingSystem", function () {
     it("Starting and stopping voting", async function () {
       const { votingSystem, owner, anotherAccount } = await loadFixture(deployVotingSystem);
       expect(await votingSystem.started()).to.equal(false);
+      expect(await votingSystem.finished()).to.equal(false);
 
       await expect(votingSystem.finishVoting()).to.be.revertedWith(
           "Can't finish - voting hasn't started"
@@ -44,6 +45,7 @@ describe("VotingSystem", function () {
 
       await expect(votingSystem.finishVoting()).not.to.be.reverted;
       expect(await votingSystem.started()).to.equal(false);
+      expect(await votingSystem.finished()).to.equal(true);
 
       await expect(votingSystem.startVoting()).to.be.revertedWith(
           "Can't start voting second time"
@@ -71,14 +73,92 @@ describe("VotingSystem", function () {
 
     });
 
-    // it("Should fail if the unlockTime is not in the future", async function () {
-    //   // We don't use the fixture here because we want a different deployment
-    //   const latestTime = await time.latest();
-    //   const Lock = await ethers.getContractFactory("Lock");
-    //   await expect(Lock.deploy(latestTime, { value: 1 })).to.be.revertedWith(
-    //     "Unlock time should be in the future"
-    //   );
-    // });
+
+  });
+
+  describe("Voting", function() {
+    it("Add candidates", async function () {
+      const { votingSystem, owner, otherAccount } = await loadFixture(deployVotingSystem);
+      
+      await expect(votingSystem.addCandidate(otherAccount.address)).not.to.be.reverted;
+      await expect(votingSystem.connect(otherAccount).addCandidate(owner.address)).not.to.be.reverted;
+
+      await expect(votingSystem.startVoting()).not.to.be.reverted;
+
+      await expect(votingSystem.addCandidate(otherAccount.address)).to.be.revertedWith(
+        "Can't add candidate during voting"
+      );
+
+      await expect(votingSystem.finishVoting()).not.to.be.reverted;
+
+      await expect(votingSystem.addCandidate(otherAccount.address)).to.be.revertedWith(
+        "Can't add candidate after voting is finished"
+      );
+
+    });
+
+
+    it("Can't add two times", async function () {
+      const { votingSystem, owner, otherAccount } = await loadFixture(deployVotingSystem);
+      
+      await expect(votingSystem.addCandidate(otherAccount.address)).not.to.be.reverted;
+
+      await expect(votingSystem.addCandidate(otherAccount.address)).to.be.revertedWith(
+        "Candidate is already registered"
+      );
+    });
+
+    it("Casting votes", async function () {
+      const { votingSystem, owner, otherAccount } = await loadFixture(deployVotingSystem);
+      await expect(votingSystem.addCandidate(otherAccount.address)).not.to.be.reverted;
+
+      expect(await votingSystem.getCandidateVotes(otherAccount.address)).to.equal(0);
+      await expect(votingSystem.startVoting()).not.to.be.reverted;
+
+      await expect(votingSystem.vote(otherAccount.address)).not.to.be.reverted;
+      expect(await votingSystem.getCandidateVotes(otherAccount.address)).to.equal(1);
+
+      await expect(votingSystem.vote(otherAccount.address)).to.be.revertedWith(
+        "You already voted"
+      );
+
+      await expect(votingSystem.connect(otherAccount).vote(otherAccount.address)).not.to.be.reverted;
+      expect(await votingSystem.getCandidateVotes(otherAccount.address)).to.equal(2);
+
+      await expect(votingSystem.connect(otherAccount).vote(otherAccount.address)).to.be.revertedWith(
+        "You already voted"
+      );
+
+    });
+
+
+    it("Voting for non-existent", async function () {
+      const { votingSystem, owner, otherAccount } = await loadFixture(deployVotingSystem);
+      await expect(votingSystem.startVoting()).not.to.be.reverted;
+      await expect(votingSystem.vote(otherAccount.address)).to.be.revertedWith(
+        "Candidate is not registered"
+      );
+    });
+
+    it("Voting and states", async function () {
+      const { votingSystem, owner, otherAccount } = await loadFixture(deployVotingSystem);
+      
+      await expect(votingSystem.addCandidate(otherAccount.address)).not.to.be.reverted;
+      await expect(votingSystem.vote(otherAccount.address)).to.be.revertedWith(
+        "Voting hasn't started or finished"
+      );
+
+      await expect(votingSystem.startVoting()).not.to.be.reverted;
+      await expect(votingSystem.finishVoting()).not.to.be.reverted;
+
+      await expect(votingSystem.vote(otherAccount.address)).to.be.revertedWith(
+        "Voting hasn't started or finished"
+      );
+    });
+
+    
+
+
   });
 
   // describe("Withdrawals", function () {

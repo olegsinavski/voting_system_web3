@@ -8,10 +8,11 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 
 contract VotingSystem is Ownable {
     mapping(address => uint) public candidates;
+    mapping(address => bool) voters;
     uint256 public winnerVotes;
     address public winner; 
     bool public started;
-    bool finished;
+    bool public finished;
 
     constructor() Ownable() {
 
@@ -29,4 +30,30 @@ contract VotingSystem is Ownable {
         started = false;
         finished = true;
     }
+
+    function addCandidate(address candidate) public {
+        require(started == false, "Can't add candidate during voting");
+        require(finished == false, "Can't add candidate after voting is finished");
+        require(candidates[candidate] == 0, "Candidate is already registered");
+        candidates[candidate] = 1;
+    }
+
+    function getCandidateVotes(address candidate) public view returns(uint256){
+        uint256 votes = candidates[candidate];
+        require(votes > 0, "Candidate is not registered");
+        return votes - 1;
+    }
+
+    function vote(address candidate) public {
+        require(started == true, "Voting hasn't started or finished");
+        require(voters[msg.sender] == false, "You already voted");
+        require(candidates[candidate] > 0, "Candidate is not registered");
+        candidates[candidate] += 1;
+        voters[msg.sender] = true;
+    }
+
+    function voted() public view returns(bool) {
+        return voters[msg.sender];
+    }
+
 }
