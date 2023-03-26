@@ -45,6 +45,9 @@ npx hardhat node
 ```
 npx create-react-app frontend
 cd frontend
+
+npm install --save-dev @nomiclabs/hardhat-waffle ethereum-waffle chai @nomiclabs/hardhat-ethers ethers
+
 npm install @ethersproject/providers
 npm install @openzeppelin/contracts
 npm install web3modal

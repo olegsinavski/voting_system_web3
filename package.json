@@ -1,6 +1,7 @@
 {
   "name": "calyptus_capstone",
   "version": "1.0.0",
+  "private": true,
   "description": "Write a smart contract that implements a voting system, with functions to - add candidates,  - start the voting process by admin, - vote for a candidate,  - end the voting process by admin, - retrieve the number of votes for each candidate, - retrieve the winning candidate.",
   "main": "app.js",
   "repository": {
@@ -12,7 +13,6 @@
   "bugs": {
     "url": "https://github.com/olegsinavski/calyptus_capstone/issues"
   },
-  "homepage": "https://github.com/olegsinavski/calyptus_capstone#readme",
   "dependencies": {
     "@testing-library/jest-dom": "^5.16.5",
     "@testing-library/react": "^13.4.0",
