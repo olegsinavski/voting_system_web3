@@ -39,3 +39,14 @@ npx hardhat test
 npx hardhat run scripts/deploy.js
 npx hardhat node
 ```
+
+# Create frontend
+
+```
+npx create-react-app frontend
+cd frontend
+npm install @ethersproject/providers
+npm install @openzeppelin/contracts
+npm install web3modal
+npm install @walletconnect/web3-provider
+```
