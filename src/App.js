@@ -8,6 +8,8 @@ import contractABI from './artifacts/contracts/VotingSystem.sol/VotingSystem.jso
 
 function App() {
   const provider = new ethers.providers.JsonRpcProvider('http://127.0.0.1:8545');
+  provider.getSigner(0).getAddress().then(console.log);
+  provider.getSigner(1).getAddress().then(console.log);
   const contractAddress = '0x5FbDB2315678afecb367f032d93F642f64180aa3'; // replace with your contract address
   const votingSystem = new Contract(contractAddress, contractABI.abi, provider);
 
