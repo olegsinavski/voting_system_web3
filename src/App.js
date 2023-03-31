@@ -3,7 +3,9 @@
 
 import { ethers } from 'ethers';
 // import { Contract } from 'ethers';
-// import { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
+import useEthersProvider from './ethersProvider';
+import Signers from './signers';
 // import contractABI from './artifacts/contracts/VotingSystem.sol/VotingSystem.json';
 
 // function App() {
@@ -35,19 +37,10 @@ import { ethers } from 'ethers';
 // }
 
 
-import { useEffect, useState } from 'react';
-
-
-const products = [
-  {title: "Cabbage", id: 1},
-  {title: "Apples", id: 2},
-  {title: "Oranges", id: 3},
-];
-
-
 export default function App() {
 
-  const provider = new ethers.providers.JsonRpcProvider('http://127.0.0.1:8545');
+  const provider = useEthersProvider('http://127.0.0.1:8545');
+  console.log('rerender');
 
   const [count, setCount] = useState(0);
 
@@ -56,36 +49,20 @@ export default function App() {
     // alert("You clicked!");
   }
 
-  const [signers, setSigners] = useState([]);
-  useEffect(() => {
-    const fetchSigners = async () => {
-      // Fetch 5 first signers from the provider
-      const promises = [...Array(5).keys()].map(i => provider.getSigner(i).getAddress());
-      const results = await Promise.all(promises);
-      setSigners(results);
-    };
-    fetchSigners();
-  });
+  const [currentSigner, setCurrentSigner] = useState("");
 
-  const listItems = signers.map(s => 
-    <li 
-      key={s}
-      >
-      {s}
-    </li>
-  );
-
-  const optionItems = signers.map(s => 
-    <option key={s} value={s}>{s}</option>
-  );
+  if (!provider) {
+    return <div> Connecting ..</div>;
+  }
 
   return (
     <div>
-      <ul>{listItems}</ul>
+      <p>Provider: {provider.connection.url}</p>
+      <h3>{currentSigner}</h3>
+      <Signers provider={provider} setCurrentSigner={setCurrentSigner}/>
       <MyButton count={count} onClick={onClick}/>
       <MyButton count={count} onClick={onClick}/>
       <br/>
-      <select> {optionItems} </select>
     </div>
   )
 
@@ -93,8 +70,6 @@ export default function App() {
 
 
 function MyButton({ count, onClick }) {
-
-
   return (
     <button onClick={onClick}> 
       Clicked {count} times
