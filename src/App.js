@@ -2,17 +2,16 @@
 // import './App.css';
 
 import { ethers } from 'ethers';
-// import { Contract } from 'ethers';
 import { useState, useEffect } from 'react';
 import useEthersProvider from './ethersProvider';
 import Signers from './signers';
-// import contractABI from './artifacts/contracts/VotingSystem.sol/VotingSystem.json';
+import contractABI from './artifacts/contracts/VotingSystem.sol/VotingSystem.json';
 
 // function App() {
 //   const provider = new ethers.providers.JsonRpcProvider('http://127.0.0.1:8545');
 //   provider.getSigner(0).getAddress().then(console.log);
 //   provider.getSigner(1).getAddress().then(console.log);
-//   const contractAddress = '0x5FbDB2315678afecb367f032d93F642f64180aa3'; // replace with your contract address
+//   const contractAddress = '0x5FbDB2315678afecb367f032d93F642f64180aa3';
 //   const votingSystem = new Contract(contractAddress, contractABI.abi, provider);
 
 //   const [started, setStarted] = useState(false);
@@ -36,17 +35,34 @@ import Signers from './signers';
 //   );
 // }
 
+function useContract(provider, contractAddress) {
+  const [contract, setContract] = useState(null);
+  useEffect(() => {
+    console.log("Connecting to contract")
+    const contract = new ethers.Contract(contractAddress, contractABI.abi, provider);
+    setContract(contract);
+  }, [contractAddress, provider]);
+  return contract;
+};
+
 
 export default function App() {
-
-  const provider = useEthersProvider('http://127.0.0.1:8545');
+  const contractAddress = '0x5FbDB2315678afecb367f032d93F642f64180aa3';
   console.log('rerender');
+  const provider = useEthersProvider('http://127.0.0.1:8545');
+  const votingSystem = useContract(provider, contractAddress);
 
-  const [count, setCount] = useState(0);
+  const [started, setStarted] = useState(false);
+  useEffect(() => {
+    const fetchStarted = async () => {
+      const startedValue = await votingSystem.started();
+      setStarted(startedValue);
+    };
+    fetchStarted();
+  }, []);
 
-  function onClick() {
-    setCount(count + 1);
-    // alert("You clicked!");
+  function onStartVoting() {
+    // TODO::
   }
 
   const [currentSigner, setCurrentSigner] = useState("");
@@ -60,8 +76,10 @@ export default function App() {
       <p>Provider: {provider.connection.url}</p>
       <h3>{currentSigner}</h3>
       <Signers provider={provider} setCurrentSigner={setCurrentSigner}/>
-      <MyButton count={count} onClick={onClick}/>
-      <MyButton count={count} onClick={onClick}/>
+      <h3> Voting: {started ? "Started": "Not started"} </h3>
+      <button onClick={onStartVoting}> 
+        Start voting!
+      </button>
       <br/>
     </div>
   )

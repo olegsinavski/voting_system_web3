@@ -15,11 +15,8 @@ export default function useEthersProvider(endpoint) {
       return () => {
         if (provider) {
           console.log("Disconnecting");
-  
           provider.removeAllListeners();
           provider.connection.close();
-        } else {
-          console.log("no need");
         }
       };
     }, [endpoint]);
