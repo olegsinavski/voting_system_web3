@@ -66,11 +66,14 @@ export default function App() {
     fetchStarted();
   }, [votingSystem]);
 
-  async function onStartVoting() {
-    // TODO::
-  }
-
   const [currentSigner, setCurrentSignerAddress] = useState("");
+
+
+  async function onStartVoting() {
+    const tx = await votingSystem.connect(provider.getSigner(currentSigner)).startVoting();
+    const response = await tx.wait();
+    console.log('Transaction response:', response);
+  }
 
   if (!provider) {
     return <div> Connecting ..</div>;
