@@ -7,34 +7,6 @@ import useEthersProvider from './ethersProvider';
 import Signers from './signers';
 import contractABI from './artifacts/contracts/VotingSystem.sol/VotingSystem.json';
 
-// function App() {
-//   const provider = new ethers.providers.JsonRpcProvider('http://127.0.0.1:8545');
-//   provider.getSigner(0).getAddress().then(console.log);
-//   provider.getSigner(1).getAddress().then(console.log);
-//   const contractAddress = '0x5FbDB2315678afecb367f032d93F642f64180aa3';
-//   const votingSystem = new Contract(contractAddress, contractABI.abi, provider);
-
-//   const [started, setStarted] = useState(false);
-//   useEffect(() => {
-//     const fetchStarted = async () => {
-//       const startedValue = await votingSystem.started();
-//       setStarted(startedValue);
-//     };
-//     fetchStarted();
-//   }, []);
-
-//   return (
-//     <div className="App">
-//       <header className="App-header">
-//         <img src={logo} className="App-logo" alt="logo" />
-//         <div>
-//           <h1>{started ? 'Contract has started' : 'Contract has not started'}</h1>
-//         </div>
-//       </header>
-//     </div>
-//   );
-// }
-
 function useContract(provider, contractAddress) {
   const [contract, setContract] = useState(null);
   useEffect(() => {
