@@ -26,35 +26,33 @@ export default function App() {
 
   const [started, setStarted] = useState(false);
   useEffect(() => {
-    const fetchStarted = async () => {
-      if (!votingSystem) {
-        console.log("No voting system yet..");
-        return;
-      }
-      const startedValue = await votingSystem.started();
-      setStarted(startedValue);
-      console.log("Set started to ", startedValue);
-    };
-    fetchStarted();
+    refreshStarted(votingSystem);
   }, [votingSystem]);
 
   const [currentSigner, setCurrentSignerAddress] = useState("");
 
+  async function refreshStarted(votingSystem) {
+    if (!votingSystem) {
+      console.log("No voting system yet..");
+      return;
+    }
+    const startedValue = await votingSystem.started();
+    setStarted(startedValue);
+    console.log("Set started to ", startedValue);
+  };
 
   async function onStartVoting() {
     const tx = await votingSystem.connect(provider.getSigner(currentSigner)).startVoting();
     const response = await tx.wait();
     console.log('Transaction response:', response);
-    const startedValue = await votingSystem.started();
-    setStarted(startedValue);
+    refreshStarted(votingSystem);
   }
 
   async function onFinishVoting() {
     const tx = await votingSystem.connect(provider.getSigner(currentSigner)).finishVoting();
     const response = await tx.wait();
     console.log('Transaction response:', response);
-    const startedValue = await votingSystem.started();
-    setStarted(startedValue);
+    refreshStarted(votingSystem);
   }
 
   if (!provider) {
@@ -78,7 +76,6 @@ export default function App() {
   )
 
 };
-
 
 function MyButton({ count, onClick }) {
   return (
