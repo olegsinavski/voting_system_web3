@@ -33,7 +33,7 @@ function Candidates({votingSystem}) {
       for (let index = 0; index < numberOfCandidates; index++) {
         const candidate = await votingSystem.getCandidate(index);
         const votes = await votingSystem.getCandidateVotes(candidate);
-        candidateVotes.push({address: candidate, votes: votes});
+        candidateVotes.push({address: candidate, votes: votes.toString()});
       }
       console.log("Candiate votes: ", candidateVotes);
       setCandidates(candidateVotes);
@@ -50,6 +50,33 @@ function Candidates({votingSystem}) {
     <h3>Current candidates:</h3>
     {candidateList}
   </div>);
+}
+
+
+function AddCandidateBox({votingSystem}) {
+  const [inputValue, setInputValue] = useState('');
+
+  async function handleSubmit(event) {
+    event.preventDefault();
+    console.log(inputValue);
+    const tx = await votingSystem.addCandidate(inputValue);
+    const response = await tx.wait();
+    console.log('Add candidate response:', response);
+  };
+
+  const handleInputChange = (event) => {
+    setInputValue(event.target.value);
+  };
+
+  return (
+    <form onSubmit={handleSubmit}>
+      <label>
+        Candidate address:
+        <input type="text" value={inputValue} onChange={handleInputChange} />
+      </label>
+      <button type="submit">Add</button>
+    </form>
+  );
 }
 
 
@@ -76,16 +103,25 @@ export default function App() {
     console.log("Set started to ", startedValue);
   };
 
+  if (!provider) {
+    return <div> Connecting (waiting for provider)..</div>;
+  }
+
+  if (!votingSystem) {
+    return <div> Connecting (waiting for contract)..</div>;
+  }
+
+  let signedVoting = null;
+  if (currentSigner !== "") {
+    console.log("Signing with", currentSigner, " signer");
+    signedVoting = votingSystem.connect(provider.getSigner(currentSigner));
+  }
+
   async function onToggleVoting() {
-    const signedVoting = votingSystem.connect(provider.getSigner(currentSigner));
     const tx = started ? await signedVoting.finishVoting() : await signedVoting.startVoting();
     const response = await tx.wait();
     console.log('Transaction response:', response);
     refreshStarted(votingSystem);
-  }
-
-  if (!provider) {
-    return <div> Connecting ..</div>;
   }
 
   return (
@@ -97,6 +133,7 @@ export default function App() {
       <button onClick={onToggleVoting}> 
         {started ? "Finish": "Start"} voting!
       </button>
+      <AddCandidateBox votingSystem={signedVoting}/>
       <br/>
       <Candidates votingSystem={votingSystem} />
     </div>
