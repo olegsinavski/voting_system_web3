@@ -18,28 +18,24 @@ function useContract(provider, contractAddress) {
 };
 
 
-function Candidates({votingSystem}) {
+async function fetchCandidates(votingSystem, setCandidates) {
+  if (!votingSystem) {
+    console.log("No voting system yet..");
+    return;
+  }
+  const numberOfCandidates = await votingSystem.getCandidateSize();
+  let candidateVotes = [];
+  for (let index = 0; index < numberOfCandidates; index++) {
+    const candidate = await votingSystem.getCandidate(index);
+    const votes = await votingSystem.getCandidateVotes(candidate);
+    candidateVotes.push({address: candidate, votes: votes.toString()});
+  }
+  console.log("Candiate votes: ", candidateVotes);
+  setCandidates(candidateVotes);
+};
 
-  const [candidates, setCandidates] = useState([]);
 
-  useEffect(() => {
-    const fetchCandidates = async () => {
-      if (!votingSystem) {
-        console.log("No voting system yet..");
-        return;
-      }
-      const numberOfCandidates = await votingSystem.getCandidateSize();
-      let candidateVotes = [];
-      for (let index = 0; index < numberOfCandidates; index++) {
-        const candidate = await votingSystem.getCandidate(index);
-        const votes = await votingSystem.getCandidateVotes(candidate);
-        candidateVotes.push({address: candidate, votes: votes.toString()});
-      }
-      console.log("Candiate votes: ", candidateVotes);
-      setCandidates(candidateVotes);
-    };
-    fetchCandidates();
-  }, [votingSystem]);
+function Candidates({candidates}) {
 
   const candidateList = candidates.map(candidate => (
     <div key={candidate.address}>
@@ -53,7 +49,7 @@ function Candidates({votingSystem}) {
 }
 
 
-function AddCandidateBox({votingSystem}) {
+function AddCandidateBox({votingSystem, onAdd}) {
   const [inputValue, setInputValue] = useState('');
 
   async function handleSubmit(event) {
@@ -62,6 +58,7 @@ function AddCandidateBox({votingSystem}) {
     const tx = await votingSystem.addCandidate(inputValue);
     const response = await tx.wait();
     console.log('Add candidate response:', response);
+    onAdd();
   };
 
   const handleInputChange = (event) => {
@@ -103,6 +100,13 @@ export default function App() {
     console.log("Set started to ", startedValue);
   };
 
+
+  const [candidates, setCandidates] = useState([]);
+
+  useEffect(() => {
+    fetchCandidates(votingSystem, setCandidates);
+  }, [votingSystem]);
+
   if (!provider) {
     return <div> Connecting (waiting for provider)..</div>;
   }
@@ -133,9 +137,9 @@ export default function App() {
       <button onClick={onToggleVoting}> 
         {started ? "Finish": "Start"} voting!
       </button>
-      <AddCandidateBox votingSystem={signedVoting}/>
+      <AddCandidateBox votingSystem={signedVoting} onAdd={() => fetchCandidates(votingSystem, setCandidates)}/>
       <br/>
-      <Candidates votingSystem={votingSystem} />
+      <Candidates candidates={candidates} />
     </div>
   )
 
