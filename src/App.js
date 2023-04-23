@@ -41,15 +41,9 @@ export default function App() {
     console.log("Set started to ", startedValue);
   };
 
-  async function onStartVoting() {
-    const tx = await votingSystem.connect(provider.getSigner(currentSigner)).startVoting();
-    const response = await tx.wait();
-    console.log('Transaction response:', response);
-    refreshStarted(votingSystem);
-  }
-
-  async function onFinishVoting() {
-    const tx = await votingSystem.connect(provider.getSigner(currentSigner)).finishVoting();
+  async function onToggleVoting() {
+    const signedVoting = votingSystem.connect(provider.getSigner(currentSigner));
+    const tx = started ? await signedVoting.finishVoting() : await signedVoting.startVoting();
     const response = await tx.wait();
     console.log('Transaction response:', response);
     refreshStarted(votingSystem);
@@ -65,11 +59,8 @@ export default function App() {
       <h3>{currentSigner}</h3>
       <Signers provider={provider} setCurrentSignerAddress={setCurrentSignerAddress}/>
       <h3> Voting: {started ? "Started": "Not started"} </h3>
-      <button onClick={onStartVoting}> 
-        Start voting!
-      </button>
-      <button onClick={onFinishVoting}> 
-        Finish voting!
+      <button onClick={onToggleVoting}> 
+        {started ? "Finish": "Start"} voting!
       </button>
       <br/>
     </div>
