@@ -18,7 +18,7 @@ function useContract(provider, contractAddress) {
 };
 
 
-function Candidates(votingSystem) {
+function Candidates({votingSystem}) {
 
   const [candidates, setCandidates] = useState([]);
 
@@ -28,10 +28,6 @@ function Candidates(votingSystem) {
         console.log("No voting system yet..");
         return;
       }
-      console.log("sdfsdf", votingSystem);
-      console.log("sdfsdf2", votingSystem.started);
-      const startedValue = await votingSystem.started();
-      
       const numberOfCandidates = await votingSystem.getCandidateSize();
       let candidateVotes = [];
       for (let index = 0; index < numberOfCandidates; index++) {
@@ -51,6 +47,7 @@ function Candidates(votingSystem) {
     </div>
   ));
   return (<div>
+    <h3>Current candidates:</h3>
     {candidateList}
   </div>);
 }
