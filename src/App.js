@@ -73,6 +73,16 @@ export default function App() {
     const tx = await votingSystem.connect(provider.getSigner(currentSigner)).startVoting();
     const response = await tx.wait();
     console.log('Transaction response:', response);
+    const startedValue = await votingSystem.started();
+    setStarted(startedValue);
+  }
+
+  async function onFinishVoting() {
+    const tx = await votingSystem.connect(provider.getSigner(currentSigner)).finishVoting();
+    const response = await tx.wait();
+    console.log('Transaction response:', response);
+    const startedValue = await votingSystem.started();
+    setStarted(startedValue);
   }
 
   if (!provider) {
@@ -87,6 +97,9 @@ export default function App() {
       <h3> Voting: {started ? "Started": "Not started"} </h3>
       <button onClick={onStartVoting}> 
         Start voting!
+      </button>
+      <button onClick={onFinishVoting}> 
+        Finish voting!
       </button>
       <br/>
     </div>
