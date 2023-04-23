@@ -18,6 +18,44 @@ function useContract(provider, contractAddress) {
 };
 
 
+function Candidates(votingSystem) {
+
+  const [candidates, setCandidates] = useState([]);
+
+  useEffect(() => {
+    const fetchCandidates = async () => {
+      if (!votingSystem) {
+        console.log("No voting system yet..");
+        return;
+      }
+      console.log("sdfsdf", votingSystem);
+      console.log("sdfsdf2", votingSystem.started);
+      const startedValue = await votingSystem.started();
+      
+      const numberOfCandidates = await votingSystem.getCandidateSize();
+      let candidateVotes = [];
+      for (let index = 0; index < numberOfCandidates; index++) {
+        const candidate = await votingSystem.getCandidate(index);
+        const votes = await votingSystem.getCandidateVotes(candidate);
+        candidateVotes.push({address: candidate, votes: votes});
+      }
+      console.log("Candiate votes: ", candidateVotes);
+      setCandidates(candidateVotes);
+    };
+    fetchCandidates();
+  }, [votingSystem]);
+
+  const candidateList = candidates.map(candidate => (
+    <div key={candidate.address}>
+      {candidate.address}: {candidate.votes}
+    </div>
+  ));
+  return (<div>
+    {candidateList}
+  </div>);
+}
+
+
 export default function App() {
   const contractAddress = '0x5FbDB2315678afecb367f032d93F642f64180aa3';
   console.log('rerender');
@@ -63,6 +101,7 @@ export default function App() {
         {started ? "Finish": "Start"} voting!
       </button>
       <br/>
+      <Candidates votingSystem={votingSystem} />
     </div>
   )
 
