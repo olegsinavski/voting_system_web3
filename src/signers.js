@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 
-export default function Signers({provider, setCurrentSigner}) {
+export default function Signers({provider, setCurrentSignerAddress}) {
 
     const [signers, setSigners] = useState([]);
     useEffect(() => {
@@ -10,7 +10,7 @@ export default function Signers({provider, setCurrentSigner}) {
         const results = await Promise.all(promises);
         setSigners(results);
         console.log('fetching');
-        setCurrentSigner(results[0]);
+        setCurrentSignerAddress(results[0]);
       };
       fetchSigners();
     }, [provider]);
@@ -20,7 +20,7 @@ export default function Signers({provider, setCurrentSigner}) {
     );
   
     function onSignerSelect(event) {
-      setCurrentSigner(event.target.value);
+      setCurrentSignerAddress(event.target.value);
     }
   
     return (

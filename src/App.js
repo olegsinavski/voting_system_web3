@@ -55,17 +55,22 @@ export default function App() {
   const [started, setStarted] = useState(false);
   useEffect(() => {
     const fetchStarted = async () => {
+      if (!votingSystem) {
+        console.log("No voting system yet..");
+        return;
+      }
       const startedValue = await votingSystem.started();
       setStarted(startedValue);
+      console.log("Set started to ", startedValue);
     };
     fetchStarted();
-  }, []);
+  }, [votingSystem]);
 
-  function onStartVoting() {
+  async function onStartVoting() {
     // TODO::
   }
 
-  const [currentSigner, setCurrentSigner] = useState("");
+  const [currentSigner, setCurrentSignerAddress] = useState("");
 
   if (!provider) {
     return <div> Connecting ..</div>;
@@ -75,7 +80,7 @@ export default function App() {
     <div>
       <p>Provider: {provider.connection.url}</p>
       <h3>{currentSigner}</h3>
-      <Signers provider={provider} setCurrentSigner={setCurrentSigner}/>
+      <Signers provider={provider} setCurrentSignerAddress={setCurrentSignerAddress}/>
       <h3> Voting: {started ? "Started": "Not started"} </h3>
       <button onClick={onStartVoting}> 
         Start voting!
