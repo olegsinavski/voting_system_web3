@@ -18,10 +18,10 @@ function useContract(provider, contractAddress) {
 };
 
 
-async function fetchCandidates(votingSystem, setCandidates) {
+async function fetchCandidates(votingSystem) {
   if (!votingSystem) {
     console.log("No voting system yet..");
-    return;
+    return [];
   }
   const numberOfCandidates = await votingSystem.getCandidateSize();
   let candidateVotes = [];
@@ -31,12 +31,11 @@ async function fetchCandidates(votingSystem, setCandidates) {
     candidateVotes.push({address: candidate, votes: votes.toString()});
   }
   console.log("Candiate votes: ", candidateVotes);
-  setCandidates(candidateVotes);
+  return candidateVotes;
 };
 
 
 function Candidates({candidates}) {
-
   const candidateList = candidates.map(candidate => (
     <div key={candidate.address}>
       {candidate.address}: {candidate.votes}
@@ -104,7 +103,7 @@ export default function App() {
   const [candidates, setCandidates] = useState([]);
 
   useEffect(() => {
-    fetchCandidates(votingSystem, setCandidates);
+    fetchCandidates(votingSystem).then(setCandidates);
   }, [votingSystem]);
 
   if (!provider) {
@@ -137,18 +136,10 @@ export default function App() {
       <button onClick={onToggleVoting}> 
         {started ? "Finish": "Start"} voting!
       </button>
-      <AddCandidateBox votingSystem={signedVoting} onAdd={() => fetchCandidates(votingSystem, setCandidates)}/>
+      <AddCandidateBox votingSystem={signedVoting} onAdd={() => fetchCandidates(votingSystem).then(setCandidates)}/>
       <br/>
       <Candidates candidates={candidates} />
     </div>
   )
 
 };
-
-function MyButton({ count, onClick }) {
-  return (
-    <button onClick={onClick}> 
-      Clicked {count} times
-    </button>
-  );
-}
