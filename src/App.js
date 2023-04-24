@@ -7,6 +7,8 @@ import useEthersProvider from './ethersProvider';
 import Signers from './signers';
 import contractABI from './artifacts/contracts/VotingSystem.sol/VotingSystem.json';
 
+import { fetchCandidates, Candidates, AddCandidateBox} from './candidates';
+
 function useContract(provider, contractAddress) {
   const [contract, setContract] = useState(null);
   useEffect(() => {
@@ -16,64 +18,6 @@ function useContract(provider, contractAddress) {
   }, [contractAddress, provider]);
   return contract;
 };
-
-
-async function fetchCandidates(votingSystem) {
-  if (!votingSystem) {
-    console.log("No voting system yet..");
-    return [];
-  }
-  const numberOfCandidates = await votingSystem.getCandidateSize();
-  let candidateVotes = [];
-  for (let index = 0; index < numberOfCandidates; index++) {
-    const candidate = await votingSystem.getCandidate(index);
-    const votes = await votingSystem.getCandidateVotes(candidate);
-    candidateVotes.push({address: candidate, votes: votes.toString()});
-  }
-  console.log("Candiate votes: ", candidateVotes);
-  return candidateVotes;
-};
-
-
-function Candidates({candidates}) {
-  const candidateList = candidates.map(candidate => (
-    <div key={candidate.address}>
-      {candidate.address}: {candidate.votes}
-    </div>
-  ));
-  return (<div>
-    <h3>Current candidates:</h3>
-    {candidateList}
-  </div>);
-}
-
-
-function AddCandidateBox({votingSystem, onAdd}) {
-  const [inputValue, setInputValue] = useState('');
-
-  async function handleSubmit(event) {
-    event.preventDefault();
-    console.log(inputValue);
-    const tx = await votingSystem.addCandidate(inputValue);
-    const response = await tx.wait();
-    console.log('Add candidate response:', response);
-    onAdd();
-  };
-
-  const handleInputChange = (event) => {
-    setInputValue(event.target.value);
-  };
-
-  return (
-    <form onSubmit={handleSubmit}>
-      <label>
-        Candidate address:
-        <input type="text" value={inputValue} onChange={handleInputChange} />
-      </label>
-      <button type="submit">Add</button>
-    </form>
-  );
-}
 
 
 export default function App() {
@@ -99,6 +43,20 @@ export default function App() {
     console.log("Set started to ", startedValue);
   };
 
+  const [voted, setVoted] = useState(false);
+  useEffect(() => {
+    refreshVoted(votingSystem);
+  }, [votingSystem]);
+
+  async function refreshVoted(votingSystem) {
+    if (!votingSystem) {
+      console.log("No voting system yet..");
+      return;
+    }
+    const votedValue = await votingSystem.voted();
+    setVoted(votedValue);
+    console.log("Set voted to ", votedValue);
+  };
 
   const [candidates, setCandidates] = useState([]);
 
@@ -116,7 +74,6 @@ export default function App() {
 
   let signedVoting = null;
   if (currentSigner !== "") {
-    console.log("Signing with", currentSigner, " signer");
     signedVoting = votingSystem.connect(provider.getSigner(currentSigner));
   }
 
@@ -127,12 +84,13 @@ export default function App() {
     refreshStarted(votingSystem);
   }
 
+
   return (
     <div>
       <p>Provider: {provider.connection.url}</p>
-      <h3>{currentSigner}</h3>
+      <h3>You are {currentSigner}</h3>
       <Signers provider={provider} setCurrentSignerAddress={setCurrentSignerAddress}/>
-      <h3> Voting: {started ? "Started": "Not started"} </h3>
+      <h3> Voting: {started ? "Started": "Not started"}; You {voted ? "voted": "not voted"}</h3>
       <button onClick={onToggleVoting}> 
         {started ? "Finish": "Start"} voting!
       </button>
