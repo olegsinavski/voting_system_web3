@@ -49,7 +49,7 @@ export function AddCandidateBox({ votingSystem, onAdd }) {
     return (
         <form onSubmit={handleSubmit}>
             <label>
-                Candidate address:
+                Add candidate address:
                 <input type="text" value={inputValue} onChange={handleInputChange} />
             </label>
             <button type="submit">Add</button>

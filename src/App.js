@@ -20,6 +20,34 @@ function useContract(provider, contractAddress) {
 };
 
 
+export function VoteBox({ votingSystem, onVote }) {
+  const [inputValue, setInputValue] = useState('');
+
+  async function handleSubmit(event) {
+      event.preventDefault();
+      console.log(inputValue);
+      const tx = await votingSystem.vote(inputValue);
+      const response = await tx.wait();
+      console.log('Voting response:', response);
+      onVote();
+  };
+
+  const handleInputChange = (event) => {
+      setInputValue(event.target.value);
+  };
+
+  return (
+      <form onSubmit={handleSubmit}>
+          <label>
+              Vot for (candidate address):
+              <input type="text" value={inputValue} onChange={handleInputChange} />
+          </label>
+          <button type="submit">Vote</button>
+      </form>
+  );
+}
+
+
 export default function App() {
   const contractAddress = '0x5FbDB2315678afecb367f032d93F642f64180aa3';
   console.log('rerender');
@@ -94,6 +122,7 @@ export default function App() {
       <button onClick={onToggleVoting}> 
         {started ? "Finish": "Start"} voting!
       </button>
+      <VoteBox votingSystem={signedVoting} onVote={() => refreshVoted(votingSystem)}/>
       <AddCandidateBox votingSystem={signedVoting} onAdd={() => fetchCandidates(votingSystem).then(setCandidates)}/>
       <br/>
       <Candidates candidates={candidates} />
