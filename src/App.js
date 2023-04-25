@@ -7,7 +7,7 @@ import useEthersProvider from './ethersProvider';
 import Signers from './signers';
 import contractABI from './artifacts/contracts/VotingSystem.sol/VotingSystem.json';
 
-import { fetchCandidates, Candidates, AddCandidateBox} from './candidates';
+import { fetchCandidates, Candidates, AddCandidateBox, fetchCurrentWinner} from './candidates';
 
 
 export function VoteBox({ votingSystem, onVote }) {
@@ -57,6 +57,7 @@ function useContract(provider, signerAddress, contractAddress) {
 };
 
 
+
 export default function App() {
   const contractAddress = '0x5FbDB2315678afecb367f032d93F642f64180aa3';
   console.log('rerender');
@@ -82,25 +83,24 @@ export default function App() {
   };
 
   const [voted, setVoted] = useState(false);
-  useEffect(() => {
-    refreshVoted(votingSystem);
-  }, [votingSystem]);
 
-  async function refreshVoted(votingSystem) {
+  const [candidates, setCandidates] = useState([]);
+  const [currentWinner, setCurrentWinner] = useState("");
+
+  function refreshAllVoting(votingSystem) {
     if (!votingSystem) {
       console.log("No voting system yet..");
       return;
     }
-    const votedValue = await votingSystem.voted();
-    setVoted(votedValue);
-    console.log("Set voted to ", votedValue);
-  };
-
-  const [candidates, setCandidates] = useState([]);
+    votingSystem.voted().then(setVoted);
+    fetchCandidates(votingSystem).then(setCandidates);
+    fetchCurrentWinner(votingSystem).then(setCurrentWinner);
+  }
 
   useEffect(() => {
-    fetchCandidates(votingSystem).then(setCandidates);
+    refreshAllVoting(votingSystem);
   }, [votingSystem]);
+
 
   if (!provider) {
     return <div> Connecting (waiting for provider)..</div>;
@@ -132,10 +132,10 @@ export default function App() {
       <button onClick={onToggleVoting}> 
         {started ? "Finish": "Start"} voting!
       </button>
-      <VoteBox votingSystem={votingSystem} onVote={() => refreshVoted(votingSystem)}/>
+      <VoteBox votingSystem={votingSystem} onVote={() => refreshAllVoting(votingSystem)}/>
       <AddCandidateBox votingSystem={votingSystem} onAdd={() => fetchCandidates(votingSystem).then(setCandidates)}/>
       <br/>
-      <Candidates candidates={candidates} />
+      <Candidates candidates={candidates} winner={currentWinner} />
     </div>
   )
 

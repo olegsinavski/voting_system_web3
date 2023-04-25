@@ -17,7 +17,16 @@ export async function fetchCandidates(votingSystem) {
 };
 
 
-export function Candidates({ candidates }) {
+export async function fetchCurrentWinner(votingSystem) {
+    if (!votingSystem) {
+        console.log("No voting system yet..");
+        return [];
+    }
+    return await votingSystem.currentWinner();
+};
+
+
+export function Candidates({ candidates, winner }) {
     const candidateList = candidates.map(candidate => (
         <div key={candidate.address}>
             {candidate.address}: {candidate.votes}
@@ -26,6 +35,7 @@ export function Candidates({ candidates }) {
     return (<div>
         <h3>Current candidates:</h3>
         {candidateList}
+        <h2> Current winner is {winner}</h2>
     </div>);
 }
 
