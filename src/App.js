@@ -83,7 +83,7 @@ export default function App() {
   };
 
   const [voted, setVoted] = useState(false);
-
+  const [isOwner, setIsOwner] = useState(false);
   const [candidates, setCandidates] = useState([]);
   const [currentWinner, setCurrentWinner] = useState("");
 
@@ -98,6 +98,19 @@ export default function App() {
   }
 
   useEffect(() => {
+    const refreshOwner = async () => {
+      if (!votingSystem) {
+        console.log("No voting system yet..");
+        return;
+      }
+      const ownerAddress = await votingSystem.owner();
+      console.log(ownerAddress, currentSignerAddress);
+      setIsOwner(ownerAddress === currentSignerAddress);
+    }
+    refreshOwner();
+  }, [votingSystem, currentSignerAddress]);
+
+  useEffect(() => {
     refreshAllVoting(votingSystem);
   }, [votingSystem]);
 
@@ -109,7 +122,7 @@ export default function App() {
   if (!votingSystem) {
     return (<div>
       <p>Provider: {provider.connection.url}</p>
-      <h3>You are {currentSignerAddress}</h3>
+      <h3>You are {currentSignerAddress} </h3>
       <Signers provider={provider} setCurrentSignerAddress={setCurrentSignerAddress}/>
     </div>);
   }
@@ -125,7 +138,7 @@ export default function App() {
   return (
     <div>
       <p>Provider: {provider.connection.url}</p>
-      <h3>You are {currentSignerAddress}</h3>
+      <h3>You are {currentSignerAddress} {isOwner ? "(admin)" : ""} </h3>
       <Signers provider={provider} setCurrentSignerAddress={setCurrentSignerAddress}/>
       <h3> Voting: {started ? "Started": "Not started"}</h3>
       <h3> You {voted ? "have voted": "haven't voted"}</h3>
