@@ -9,16 +9,6 @@ import contractABI from './artifacts/contracts/VotingSystem.sol/VotingSystem.jso
 
 import { fetchCandidates, Candidates, AddCandidateBox} from './candidates';
 
-function useContract(provider, contractAddress) {
-  const [contract, setContract] = useState(null);
-  useEffect(() => {
-    console.log("Connecting to contract")
-    const contract = new ethers.Contract(contractAddress, contractABI.abi, provider);
-    setContract(contract);
-  }, [contractAddress, provider]);
-  return contract;
-};
-
 
 export function VoteBox({ votingSystem, onVote }) {
   const [inputValue, setInputValue] = useState('');
@@ -47,19 +37,39 @@ export function VoteBox({ votingSystem, onVote }) {
   );
 }
 
+function useContract(provider, signerAddress, contractAddress) {
+  const [contract, setContract] = useState(null);
+  useEffect(() => {
+    if (!provider) {
+      setContract(null);
+      return;
+    }
+    if (!signerAddress) {
+      setContract(null);
+      return;
+    }
+    const signer = provider.getSigner(signerAddress);
+    console.log("Connecting to contract")
+    const contract = new ethers.Contract(contractAddress, contractABI.abi, signer);
+    setContract(contract);
+  }, [provider, signerAddress, contractAddress]);
+  return contract;
+};
+
 
 export default function App() {
   const contractAddress = '0x5FbDB2315678afecb367f032d93F642f64180aa3';
   console.log('rerender');
   const provider = useEthersProvider('http://127.0.0.1:8545');
-  const votingSystem = useContract(provider, contractAddress);
+
+  const [currentSignerAddress, setCurrentSignerAddress] = useState("");
+
+  const votingSystem = useContract(provider, currentSignerAddress, contractAddress);
 
   const [started, setStarted] = useState(false);
   useEffect(() => {
     refreshStarted(votingSystem);
   }, [votingSystem]);
-
-  const [currentSigner, setCurrentSignerAddress] = useState("");
 
   async function refreshStarted(votingSystem) {
     if (!votingSystem) {
@@ -97,16 +107,15 @@ export default function App() {
   }
 
   if (!votingSystem) {
-    return <div> Connecting (waiting for contract)..</div>;
-  }
-
-  let signedVoting = null;
-  if (currentSigner !== "") {
-    signedVoting = votingSystem.connect(provider.getSigner(currentSigner));
+    return (<div>
+      <p>Provider: {provider.connection.url}</p>
+      <h3>You are {currentSignerAddress}</h3>
+      <Signers provider={provider} setCurrentSignerAddress={setCurrentSignerAddress}/>
+    </div>);
   }
 
   async function onToggleVoting() {
-    const tx = started ? await signedVoting.finishVoting() : await signedVoting.startVoting();
+    const tx = started ? await votingSystem.finishVoting() : await votingSystem.startVoting();
     const response = await tx.wait();
     console.log('Transaction response:', response);
     refreshStarted(votingSystem);
@@ -116,14 +125,15 @@ export default function App() {
   return (
     <div>
       <p>Provider: {provider.connection.url}</p>
-      <h3>You are {currentSigner}</h3>
+      <h3>You are {currentSignerAddress}</h3>
       <Signers provider={provider} setCurrentSignerAddress={setCurrentSignerAddress}/>
-      <h3> Voting: {started ? "Started": "Not started"}; You {voted ? "voted": "not voted"}</h3>
+      <h3> Voting: {started ? "Started": "Not started"}</h3>
+      <h3> You {voted ? "have voted": "haven't voted"}</h3>
       <button onClick={onToggleVoting}> 
         {started ? "Finish": "Start"} voting!
       </button>
-      <VoteBox votingSystem={signedVoting} onVote={() => refreshVoted(votingSystem)}/>
-      <AddCandidateBox votingSystem={signedVoting} onAdd={() => fetchCandidates(votingSystem).then(setCandidates)}/>
+      <VoteBox votingSystem={votingSystem} onVote={() => refreshVoted(votingSystem)}/>
+      <AddCandidateBox votingSystem={votingSystem} onAdd={() => fetchCandidates(votingSystem).then(setCandidates)}/>
       <br/>
       <Candidates candidates={candidates} />
     </div>
