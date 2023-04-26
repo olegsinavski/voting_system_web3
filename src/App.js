@@ -4,11 +4,112 @@
 import { ethers } from 'ethers';
 import { useState, useEffect } from 'react';
 import useEthersProvider from './ethersProvider';
-import Signers from './signers';
+// import Signers from './signers';
 import contractABI from './artifacts/contracts/VotingSystem.sol/VotingSystem.json';
 
-import { fetchCandidates, Candidates, AddCandidateBox, fetchCurrentWinner} from './candidates';
+// import { fetchCandidates, Candidates, AddCandidateBox, fetchCurrentWinner} from './candidates';
 
+
+
+export async function fetchCandidates(votingSystem) {
+  if (!votingSystem) {
+      return [];
+  }
+  const numberOfCandidates = await votingSystem.getCandidateSize();
+  let candidateVotes = [];
+  for (let index = 0; index < numberOfCandidates; index++) {
+      const candidate = await votingSystem.getCandidate(index);
+      const votes = await votingSystem.getCandidateVotes(candidate);
+      candidateVotes.push({ address: candidate, votes: votes.toString() });
+  }
+  return candidateVotes;
+};
+
+
+export async function fetchCurrentWinner(votingSystem) {
+  if (!votingSystem) {
+      return [];
+  }
+  return await votingSystem.currentWinner();
+};
+
+
+export function Candidates({ candidates, winner }) {
+  const candidateList = candidates.map(candidate => (
+      <div key={candidate.address}>
+          {candidate.address}: {candidate.votes}
+      </div>
+  ));
+  return (<div>
+      <h3>Current candidates:</h3>
+      {candidateList}
+      <h2> Current winner is {winner}</h2>
+  </div>);
+}
+
+
+export function AddCandidateBox({ votingSystem, onAdd, setErrorMessage }) {
+  const [inputValue, setInputValue] = useState('');
+
+  async function handleSubmit(event) {
+      event.preventDefault();
+      try {
+          const tx = await votingSystem.addCandidate(inputValue);
+          const response = await tx.wait();
+          console.log('Add candidate response:', response);
+      } catch(error) {
+          console.log(error)
+          setErrorMessage(error.error.error.data.message);
+      }
+      onAdd();
+  };
+
+  const handleInputChange = (event) => {
+      setInputValue(event.target.value);
+  };
+
+  return (
+      <form onSubmit={handleSubmit}>
+          <label>
+              Add candidate address:
+              <input type="text" value={inputValue} onChange={handleInputChange} />
+          </label>
+          <button type="submit">Add</button>
+      </form>
+  );
+}
+
+export default function Signers({provider, setCurrentSignerAddress, initialValue}) {
+
+  const [signers, setSigners] = useState([]);
+  const [selectedSigner, setSelectedSigner] = useState('');
+  useEffect(() => {
+    const fetchSigners = async () => {
+      // Fetch 5 first signers from the provider
+      const promises = [...Array(5).keys()].map(i => provider.getSigner(i).getAddress());
+      const results = await Promise.all(promises);
+      setSigners(results);
+      setCurrentSignerAddress(results[0]);
+      setSelectedSigner(results[0]);
+    };
+    fetchSigners();
+  }, [provider]);
+
+  const optionItems = signers.map(s => 
+    <option key={s} value={s}>{s}</option>
+  );
+
+  function onSignerSelect(event) {
+    setCurrentSignerAddress(event.target.value);
+    setSelectedSigner(event.target.value);
+  }
+
+  return (
+    <div>
+      <select value={selectedSigner} onChange={onSignerSelect}> {optionItems} </select>
+    </div>
+  )
+}
 
 export function VoteBox({ votingSystem, onVote,  setErrorMessage}) {
   const [inputValue, setInputValue] = useState('');
@@ -53,7 +154,6 @@ function useContract(provider, signerAddress, contractAddress) {
       return;
     }
     const signer = provider.getSigner(signerAddress);
-    console.log("Connecting to contract")
     const contract = new ethers.Contract(contractAddress, contractABI.abi, signer);
     setContract(contract);
   }, [provider, signerAddress, contractAddress]);
@@ -64,7 +164,6 @@ function useContract(provider, signerAddress, contractAddress) {
 
 export default function App() {
   const contractAddress = '0x5FbDB2315678afecb367f032d93F642f64180aa3';
-  console.log('rerender');
   const provider = useEthersProvider('http://127.0.0.1:8545');
 
   const [currentSignerAddress, setCurrentSignerAddress] = useState("");
@@ -78,12 +177,10 @@ export default function App() {
 
   async function refreshStarted(votingSystem) {
     if (!votingSystem) {
-      console.log("No voting system yet..");
       return;
     }
     const startedValue = await votingSystem.started();
     setStarted(startedValue);
-    console.log("Set started to ", startedValue);
   };
 
   const [voted, setVoted] = useState(false);
@@ -104,7 +201,6 @@ export default function App() {
 
   function refreshAllVoting(votingSystem) {
     if (!votingSystem) {
-      console.log("No voting system yet..");
       return;
     }
     votingSystem.voted().then(setVoted);
@@ -120,7 +216,6 @@ export default function App() {
   useEffect(() => {
     const refreshOwner = async () => {
       if (!votingSystem) {
-        console.log("No voting system yet..");
         return;
       }
       const ownerAddress = await votingSystem.owner();
