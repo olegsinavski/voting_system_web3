@@ -17,6 +17,16 @@ describe("VotingSystem", function () {
     return { votingSystem, owner, otherAccount, thirdAccount };
   }
 
+  async function getCandidates(votingSystem) {
+    const numberOfCandidates = await votingSystem.getCandidateSize();
+    const candidates = await Promise.all(
+      Array.from({ length: numberOfCandidates }, (_, index) =>
+        votingSystem.getCandidate(index)
+      )
+    );
+    return candidates;
+  }
+
   describe("State transition", function () {
     it("Should set the right owner", async function () {
       const { votingSystem, owner } = await loadFixture(deployVotingSystem);
@@ -89,6 +99,8 @@ describe("VotingSystem", function () {
       await expect(votingSystem.addCandidate(otherAccount.address)).to.be.revertedWith(
         "Can't add candidate after voting is finished"
       );
+        
+      expect(await getCandidates(votingSystem)).to.be.deep.equal([otherAccount.address]);
 
     });
 
@@ -161,6 +173,7 @@ describe("VotingSystem", function () {
       
       await expect(votingSystem.addCandidate(otherAccount.address)).not.to.be.reverted;
       await expect(votingSystem.connect(otherAccount).addCandidate(owner.address)).not.to.be.reverted;
+      expect(await getCandidates(votingSystem)).to.be.deep.equal([otherAccount.address, owner.address]);
 
       await expect(votingSystem.startVoting()).not.to.be.reverted;
 
@@ -170,7 +183,6 @@ describe("VotingSystem", function () {
 
       expect(await votingSystem.getCandidateVotes(otherAccount.address)).to.equal(1);
       expect(await votingSystem.getCandidateVotes(owner.address)).to.equal(2);
-     
     });
 
   });
