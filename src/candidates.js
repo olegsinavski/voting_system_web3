@@ -40,15 +40,20 @@ export function Candidates({ candidates, winner }) {
 }
 
 
-export function AddCandidateBox({ votingSystem, onAdd }) {
+export function AddCandidateBox({ votingSystem, onAdd, setErrorMessage }) {
     const [inputValue, setInputValue] = useState('');
 
     async function handleSubmit(event) {
         event.preventDefault();
         console.log(inputValue);
-        const tx = await votingSystem.addCandidate(inputValue);
-        const response = await tx.wait();
-        console.log('Add candidate response:', response);
+        try {
+            const tx = await votingSystem.addCandidate(inputValue);
+            const response = await tx.wait();
+            console.log('Add candidate response:', response);
+        } catch(error) {
+            console.log(error)
+            setErrorMessage(error.error.error.data.message);
+        }
         onAdd();
     };
 

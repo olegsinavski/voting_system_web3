@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 
-export default function Signers({provider, setCurrentSignerAddress}) {
+export default function Signers({provider, setCurrentSignerAddress, initialValue}) {
 
     const [signers, setSigners] = useState([]);
+    const [selectedSigner, setSelectedSigner] = useState('');
     useEffect(() => {
       const fetchSigners = async () => {
         // Fetch 5 first signers from the provider
@@ -11,6 +12,7 @@ export default function Signers({provider, setCurrentSignerAddress}) {
         setSigners(results);
         console.log('fetching');
         setCurrentSignerAddress(results[0]);
+        setSelectedSigner(results[0]);
       };
       fetchSigners();
     }, [provider]);
@@ -21,11 +23,12 @@ export default function Signers({provider, setCurrentSignerAddress}) {
   
     function onSignerSelect(event) {
       setCurrentSignerAddress(event.target.value);
+      setSelectedSigner(event.target.value);
     }
   
     return (
       <div>
-        <select onChange={onSignerSelect}> {optionItems} </select>
+        <select value={selectedSigner} onChange={onSignerSelect}> {optionItems} </select>
       </div>
     )
 }

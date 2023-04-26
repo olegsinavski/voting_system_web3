@@ -10,15 +10,19 @@ import contractABI from './artifacts/contracts/VotingSystem.sol/VotingSystem.jso
 import { fetchCandidates, Candidates, AddCandidateBox, fetchCurrentWinner} from './candidates';
 
 
-export function VoteBox({ votingSystem, onVote }) {
+export function VoteBox({ votingSystem, onVote,  setErrorMessage}) {
   const [inputValue, setInputValue] = useState('');
 
   async function handleSubmit(event) {
       event.preventDefault();
-      console.log(inputValue);
-      const tx = await votingSystem.vote(inputValue);
-      const response = await tx.wait();
-      console.log('Voting response:', response);
+      try {
+        const tx = await votingSystem.vote(inputValue);
+        const response = await tx.wait();
+        console.log('Voting response:', response);
+      } catch(error) {
+        console.log(error)
+        setErrorMessage(error.error.error.data.message);
+      }
       onVote();
   };
 
@@ -86,6 +90,17 @@ export default function App() {
   const [isOwner, setIsOwner] = useState(false);
   const [candidates, setCandidates] = useState([]);
   const [currentWinner, setCurrentWinner] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setErrorMessage("");
+    }, 3000);
+
+    return () => {
+      clearTimeout(timer);
+    };
+  }, [errorMessage]);
 
   function refreshAllVoting(votingSystem) {
     if (!votingSystem) {
@@ -94,7 +109,12 @@ export default function App() {
     }
     votingSystem.voted().then(setVoted);
     fetchCandidates(votingSystem).then(setCandidates);
-    fetchCurrentWinner(votingSystem).then(setCurrentWinner);
+    if (started) {
+      fetchCurrentWinner(votingSystem).then(setCurrentWinner);
+    } else {
+      setCurrentWinner("");
+    }
+    
   }
 
   useEffect(() => {
@@ -104,7 +124,6 @@ export default function App() {
         return;
       }
       const ownerAddress = await votingSystem.owner();
-      console.log(ownerAddress, currentSignerAddress);
       setIsOwner(ownerAddress === currentSignerAddress);
     }
     refreshOwner();
@@ -128,25 +147,35 @@ export default function App() {
   }
 
   async function onToggleVoting() {
-    const tx = started ? await votingSystem.finishVoting() : await votingSystem.startVoting();
-    const response = await tx.wait();
-    console.log('Transaction response:', response);
+    try {
+      const tx = started ? await votingSystem.finishVoting() : await votingSystem.startVoting();
+      const response = await tx.wait();
+      console.log('Transaction response:', response);
+    } catch (error) {
+      console.log(error)
+      setErrorMessage(error.error.error.data.message);
+    } 
     refreshStarted(votingSystem);
   }
 
 
   return (
     <div>
+      {errorMessage && (
+        <div className="error-popup">
+          <p>{errorMessage}</p>
+        </div>
+      )}
       <p>Provider: {provider.connection.url}</p>
       <h3>You are {currentSignerAddress} {isOwner ? "(admin)" : ""} </h3>
-      <Signers provider={provider} setCurrentSignerAddress={setCurrentSignerAddress}/>
+      <Signers provider={provider} setCurrentSignerAddress={setCurrentSignerAddress} initialValue={currentSignerAddress}/>
       <h3> Voting: {started ? "Started": "Not started"}</h3>
       <h3> You {voted ? "have voted": "haven't voted"}</h3>
       <button onClick={onToggleVoting}> 
         {started ? "Finish": "Start"} voting!
       </button>
-      <VoteBox votingSystem={votingSystem} onVote={() => refreshAllVoting(votingSystem)}/>
-      <AddCandidateBox votingSystem={votingSystem} onAdd={() => fetchCandidates(votingSystem).then(setCandidates)}/>
+      <VoteBox votingSystem={votingSystem} onVote={() => refreshAllVoting(votingSystem)} setErrorMessage={setErrorMessage}/>
+      <AddCandidateBox votingSystem={votingSystem} onAdd={() => fetchCandidates(votingSystem).then(setCandidates)} setErrorMessage={setErrorMessage}/>
       <br/>
       <Candidates candidates={candidates} winner={currentWinner} />
     </div>
