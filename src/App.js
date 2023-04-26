@@ -1,5 +1,5 @@
 // import logo from './logo.svg';
-// import './App.css';
+import './App.css';
 
 import { ethers } from 'ethers';
 import { useState, useEffect } from 'react';
@@ -9,7 +9,50 @@ import contractABI from './artifacts/contracts/VotingSystem.sol/VotingSystem.jso
 
 // import { fetchCandidates, Candidates, AddCandidateBox, fetchCurrentWinner} from './candidates';
 
+import styled from 'styled-components';
+const StyledForm = styled.form`
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-bottom: 2rem;
+`;
 
+
+const StyledButton = styled.button`
+  background-color: #007bff;
+  border: none;
+  color: white;
+  cursor: pointer;
+  font-size: 1rem;
+  padding: 0.5rem 1rem;
+  transition: background-color 0.2s;
+
+  &:hover {
+    background-color: #0056b3;
+  }
+`;
+
+
+const StyledInput = styled.input`
+  border: 1px solid #ced4da;
+  border-radius: 0.25rem;
+  font-size: 1rem;
+  padding: 0.5rem;
+`;
+
+function validateAddress(address) {
+  try {
+    ethers.utils.getAddress(address);
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
+
+function txErrorToHumanReadable(error) {
+  const message = error.error.error.data.message;
+  return message.split("reverted with reason string '")[1].slice(0, -1);
+}
 
 export async function fetchCandidates(votingSystem) {
   if (!votingSystem) {
@@ -33,114 +76,6 @@ export async function fetchCurrentWinner(votingSystem) {
   return await votingSystem.currentWinner();
 };
 
-
-export function Candidates({ candidates, winner }) {
-  const candidateList = candidates.map(candidate => (
-      <div key={candidate.address}>
-          {candidate.address}: {candidate.votes}
-      </div>
-  ));
-  return (<div>
-      <h3>Current candidates:</h3>
-      {candidateList}
-      <h2> Current winner is {winner}</h2>
-  </div>);
-}
-
-
-export function AddCandidateBox({ votingSystem, onAdd, setErrorMessage }) {
-  const [inputValue, setInputValue] = useState('');
-
-  async function handleSubmit(event) {
-      event.preventDefault();
-      try {
-          const tx = await votingSystem.addCandidate(inputValue);
-          const response = await tx.wait();
-          console.log('Add candidate response:', response);
-      } catch(error) {
-          console.log(error)
-          setErrorMessage(error.error.error.data.message);
-      }
-      onAdd();
-  };
-
-  const handleInputChange = (event) => {
-      setInputValue(event.target.value);
-  };
-
-  return (
-      <form onSubmit={handleSubmit}>
-          <label>
-              Add candidate address:
-              <input type="text" value={inputValue} onChange={handleInputChange} />
-          </label>
-          <button type="submit">Add</button>
-      </form>
-  );
-}
-
-export function Signers({provider, setCurrentSignerAddress, initialValue}) {
-
-  const [signers, setSigners] = useState([]);
-  const [selectedSigner, setSelectedSigner] = useState('');
-  useEffect(() => {
-    const fetchSigners = async () => {
-      // Fetch 5 first signers from the provider
-      const promises = [...Array(5).keys()].map(i => provider.getSigner(i).getAddress());
-      const results = await Promise.all(promises);
-      setSigners(results);
-      setCurrentSignerAddress(results[0]);
-      setSelectedSigner(initialValue);
-    };
-    fetchSigners();
-  }, [provider, setCurrentSignerAddress]);
-
-  const optionItems = signers.map(s => 
-    <option key={s} value={s}>{s}</option>
-  );
-
-  function onSignerSelect(event) {
-    setCurrentSignerAddress(event.target.value);
-    setSelectedSigner(event.target.value);
-  }
-
-  return (
-    <div>
-      <select value={selectedSigner} onChange={onSignerSelect}> {optionItems} </select>
-    </div>
-  )
-}
-
-export function VoteBox({ votingSystem, onVote,  setErrorMessage}) {
-  const [inputValue, setInputValue] = useState('');
-
-  async function handleSubmit(event) {
-      event.preventDefault();
-      try {
-        const tx = await votingSystem.vote(inputValue);
-        const response = await tx.wait();
-        console.log('Voting response:', response);
-      } catch(error) {
-        console.log(error)
-        setErrorMessage(error.error.error.data.message);
-      }
-      onVote();
-  };
-
-  const handleInputChange = (event) => {
-      setInputValue(event.target.value);
-  };
-
-  return (
-      <form onSubmit={handleSubmit}>
-          <label>
-              Vot for (candidate address):
-              <input type="text" value={inputValue} onChange={handleInputChange} />
-          </label>
-          <button type="submit">Vote</button>
-      </form>
-  );
-}
 
 function useContract(provider, signerAddress, contractAddress) {
   const [contract, setContract] = useState(null);
@@ -169,6 +104,24 @@ export default function App() {
   const [currentSignerAddress, setCurrentSignerAddress] = useState("");
 
   const votingSystem = useContract(provider, currentSignerAddress, contractAddress);
+
+  const [signers, setSigners] = useState([]);
+  const [selectedSigner, setSelectedSigner] = useState(currentSignerAddress);
+  useEffect(() => {
+    const fetchSigners = async () => {
+      if (!provider) {
+        setSigners([]);
+        return;
+      }
+      // Fetch 5 first signers from the provider
+      const promises = [...Array(5).keys()].map(i => provider.getSigner(i).getAddress());
+      const results = await Promise.all(promises);
+      setSigners(results);
+      setCurrentSignerAddress(results[0]);
+      setSelectedSigner(results[0]);
+    };
+    fetchSigners();
+  }, [provider]);
 
   const [started, setStarted] = useState(false);
   useEffect(() => {
@@ -228,6 +181,13 @@ export default function App() {
     refreshAllVoting(votingSystem, started);
   }, [votingSystem, started]);
 
+  const [candidateInputValue, setCandidateInputValue] = useState('');
+
+  const [voteInputValue, setVoteInputValue] = useState('');
+
+  const optionItems = signers.map(s => 
+    <option key={s} value={s}>{s}</option>
+  );
 
   if (!provider) {
     return <div> Connecting (waiting for provider)..</div>;
@@ -237,8 +197,13 @@ export default function App() {
     return (<div>
       <p>Provider: {provider.connection.url}</p>
       <h3>You are {currentSignerAddress} </h3>
-      <Signers provider={provider} setCurrentSignerAddress={setCurrentSignerAddress}/>
+      <select value={selectedSigner} onChange={onSignerSelect}> {optionItems} </select>
     </div>);
+  }
+
+  function onSignerSelect(event) {
+    setCurrentSignerAddress(event.target.value);
+    setSelectedSigner(event.target.value);
   }
 
   async function onToggleVoting() {
@@ -248,32 +213,99 @@ export default function App() {
       console.log('Transaction response:', response);
     } catch (error) {
       console.log(error)
-      setErrorMessage(error.error.error.data.message);
+      setErrorMessage(txErrorToHumanReadable(error));
     } 
     refreshStarted(votingSystem);
   }
 
+  async function handleAddCandidateSubmit(event) {
+    event.preventDefault();
+    if (!validateAddress(candidateInputValue)) {
+      setErrorMessage('Invalid candidate address - should be full address');
+      return;
+    }
+    try {
+        const tx = await votingSystem.addCandidate(candidateInputValue);
+        const response = await tx.wait();
+        console.log('Add candidate response:', response);
+    } catch(error) {
+        console.log(error)
+        setErrorMessage(txErrorToHumanReadable(error));
+    }
+    fetchCandidates(votingSystem).then(setCandidates)
+  };
+
+  const handleCandidateInputChange = (event) => {
+      setCandidateInputValue(event.target.value);
+  };
+
+  async function handleVoteSubmit(event) {
+    event.preventDefault();
+    if (!validateAddress(voteInputValue)) {
+      setErrorMessage('Invalid vote address - should be full address');
+      return;
+    }
+    try {
+      const tx = await votingSystem.vote(voteInputValue);
+      const response = await tx.wait();
+      console.log('Voting response:', response);
+    } catch(error) {
+      console.log(error)
+      setErrorMessage(txErrorToHumanReadable(error));
+    }
+      refreshAllVoting(votingSystem)
+  };
+
+  const handleVoteInputChange = (event) => {
+    setVoteInputValue(event.target.value);
+  };
+
+  const candidateList = candidates.map(candidate => (
+    <div key={candidate.address}>
+        {candidate.address}: {candidate.votes}
+    </div>
+  ));
 
   return (
     <div>
-      {errorMessage && (
-        <div className="error-popup">
-          <p>{errorMessage}</p>
-        </div>
-      )}
-      <p>Provider: {provider.connection.url}</p>
-      <h3>You are {currentSignerAddress} {isOwner ? "(admin)" : ""} </h3>
-      <Signers provider={provider} setCurrentSignerAddress={setCurrentSignerAddress} initialValue={currentSignerAddress}/>
-      <h3> Voting: {started ? "Started": "Not started"}</h3>
-      <h3> You {voted ? "have voted": "haven't voted"}</h3>
-      <button onClick={onToggleVoting}> 
-        {started ? "Finish": "Start"} voting!
-      </button>
-      <VoteBox votingSystem={votingSystem} onVote={() => refreshAllVoting(votingSystem)} setErrorMessage={setErrorMessage}/>
-      <AddCandidateBox votingSystem={votingSystem} onAdd={() => fetchCandidates(votingSystem).then(setCandidates)} setErrorMessage={setErrorMessage}/>
-      <br/>
-      <Candidates candidates={candidates} winner={currentWinner} />
+    <div className="container">
+      <div className="column">
+        <h3> Voting: {started ? "Started": "Not started"}</h3>
+        <h3> You {voted ? "have voted": "haven't voted"}</h3>
+        <button onClick={onToggleVoting}> 
+          {started ? "Finish": "Start"} voting!
+        </button>
+        <form onSubmit={handleVoteSubmit}>
+          <label>
+            Vote for (candidate address):
+            <input type="text" value={voteInputValue} onChange={handleVoteInputChange} />
+          </label>
+          <button type="submit">Vote</button>
+        </form>
+        <form onSubmit={handleAddCandidateSubmit}>
+          <label>
+            Add candidate address:
+            <input type="text" value={candidateInputValue} onChange={handleCandidateInputChange} />
+          </label>
+          <button type="submit">Add</button>
+        </form>
+        <h3>Current candidates:</h3>
+          {candidateList}
+        <h3> Current winner is {currentWinner}</h3>
+      </div>
+
+      <div className="column">
+        {errorMessage && (
+          <div className="error-popup">
+            <p>{errorMessage}</p>
+          </div>
+        )}
+        <p>Network {provider.connection.url}</p>
+        <h3>Identity{isOwner ? " (admin):" : ":"} </h3>
+        <select value={selectedSigner} onChange={onSignerSelect}> {optionItems} </select>
+      </div>
     </div>
-  )
+    </div>
+  );
 
 };
