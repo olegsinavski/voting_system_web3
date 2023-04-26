@@ -79,7 +79,7 @@ export function AddCandidateBox({ votingSystem, onAdd, setErrorMessage }) {
   );
 }
 
-export default function Signers({provider, setCurrentSignerAddress, initialValue}) {
+export function Signers({provider, setCurrentSignerAddress, initialValue}) {
 
   const [signers, setSigners] = useState([]);
   const [selectedSigner, setSelectedSigner] = useState('');
@@ -90,10 +90,10 @@ export default function Signers({provider, setCurrentSignerAddress, initialValue
       const results = await Promise.all(promises);
       setSigners(results);
       setCurrentSignerAddress(results[0]);
-      setSelectedSigner(results[0]);
+      setSelectedSigner(initialValue);
     };
     fetchSigners();
-  }, [provider]);
+  }, [provider, setCurrentSignerAddress]);
 
   const optionItems = signers.map(s => 
     <option key={s} value={s}>{s}</option>
@@ -199,7 +199,7 @@ export default function App() {
     };
   }, [errorMessage]);
 
-  function refreshAllVoting(votingSystem) {
+  function refreshAllVoting(votingSystem, started) {
     if (!votingSystem) {
       return;
     }
@@ -225,8 +225,8 @@ export default function App() {
   }, [votingSystem, currentSignerAddress]);
 
   useEffect(() => {
-    refreshAllVoting(votingSystem);
-  }, [votingSystem]);
+    refreshAllVoting(votingSystem, started);
+  }, [votingSystem, started]);
 
 
   if (!provider) {
