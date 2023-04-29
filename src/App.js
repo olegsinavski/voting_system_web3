@@ -57,6 +57,10 @@ function useContract(provider, signerAddress, contractAddress) {
       setContract(null);
       return;
     }
+    if (!contractAddress) {
+      setContract(null);
+      return;
+    }
     const signer = provider.getSigner(signerAddress);
     const contract = new ethers.Contract(contractAddress, contractABI.abi, signer);
     setContract(contract);
@@ -68,7 +72,7 @@ function useContract(provider, signerAddress, contractAddress) {
 
 export default function App() {
   const provider = useEthersProvider('http://127.0.0.1:8545');
-  const [contractAddress, setContractAddress] = useState('0x5FbDB2315678afecb367f032d93F642f64180aa3');
+  const [contractAddress, setContractAddress] = useState("");
   const [signers, setSigners] = useState([]);
   const [currentSignerAddress, setCurrentSignerAddress] = useState("");
 
@@ -163,9 +167,15 @@ export default function App() {
 
   async function onDeployNewContract() {
     const signer = provider.getSigner(currentSignerAddress);
-    const bytecode = await provider.getCode(contractAddress);
-    console.log(contractABI.bytecode);
-    //setContractAddress(allContracts);
+    const VotingFactory = new ethers.ContractFactory(contractABI.abi, contractABI.bytecode, signer);
+    try {
+      const contractInstance = await VotingFactory.deploy();
+      await contractInstance.deployed();
+      setContractAddress(contractInstance.address);
+    } catch (error) {
+      console.log(error)
+      setErrorMessage(txErrorToHumanReadable(error));
+    } 
   }
 
   if (!votingSystem) {
@@ -173,7 +183,7 @@ export default function App() {
       <p>Provider: {provider.connection.url}</p>
       <h3>You are {currentSignerAddress} </h3>
       <select value={selectedSigner} onChange={onSignerSelect}> {optionItems} </select>
-
+      <div> <button className="action-button" onClick={onDeployNewContract}>Deploy new voting system</button> </div>
     </div>);
   }
 
@@ -247,22 +257,32 @@ export default function App() {
     <div className="container">
       <div className="wider-column">
         <h3>Voting has <span className="status-indicator">{started ? "started": "not started"}</span>, you 
-          <span className="status-indicator">{voted ? " have voted": " haven't voted"}</span></h3>
-        <button className="action-button" onClick={onToggleVoting}>{started ? "Finish": "Start"} voting!</button>
-        <form onSubmit={handleVoteSubmit}>
-          <label>
-            Vote for (candidate address):
-            <input className="form-input" type="text" value={voteInputValue} onChange={handleVoteInputChange} />
-          </label>
-          <button className="action-button" type="submit">Vote</button>
-        </form>
-        <form onSubmit={handleAddCandidateSubmit}>
-          <label>
-            Add candidate address:
-            <input className="form-input" type="text" value={candidateInputValue} onChange={handleCandidateInputChange} />
-          </label>
-          <button className="action-button" type="submit">Add</button>
-        </form>
+          <span className="status-indicator">{voted ? " have voted": " haven't voted"}</span>
+        </h3>
+        {currentWinner && (<div><h3>Current winner:</h3>
+        <div className="winner-container">
+          <div className="winner-address">{currentWinner}</div>
+        </div>
+        </div>)}
+        
+          <div className="form-container">
+            <form onSubmit={handleAddCandidateSubmit}>
+              <label className="form-label">
+                Add candidate address:
+                </label>
+              <input className="form-input" type="text" value={candidateInputValue} onChange={handleCandidateInputChange} />
+              
+              <button className="action-button" type="submit">Add</button>
+            </form>
+            <form onSubmit={handleVoteSubmit}>
+              <label className="form-label">
+                Vote for (candidate address):</label>
+
+                <input className="form-input" type="text" value={voteInputValue} onChange={handleVoteInputChange} />
+              
+              <button className="action-button" type="submit">Vote</button>
+            </form>
+          </div>
         <h3>Current candidates:</h3>
         <table className="candidate-table">
         <thead>
@@ -280,22 +300,23 @@ export default function App() {
           ))}
         </tbody>
       </table>
-        <h3>Current winner:</h3>
-        <div className="winner-container">
-          <div className="winner-address">{currentWinner}</div>
-        </div>
+
       </div>
 
       <div className="narrower-column">
+      <div className="narrower-column-internal">
         <p>Network {provider.connection.url}</p>
+        <p>Contract {contractAddress}</p>
         <h3>Identity{isOwner ? " (admin):" : ":"} </h3>
         <select value={selectedSigner} onChange={onSignerSelect}> {optionItems} </select>
-        {isOwner && (<div> <button className="action-button" onClick={onDeployNewContract}>Deploy new voting system</button> </div>)}
+        <div> {isOwner && <button className="action-button" onClick={onToggleVoting}>{started ? "Finish": "Start"} voting!</button>} </div>
+        <div> <button className="action-button" onClick={onDeployNewContract}>Deploy new voting system</button> </div>
         {errorMessage && (
           <div className="error-popup">
             <p>{errorMessage}</p>
           </div>
         )}
+        </div>
       </div>
     </div>
     </div>
