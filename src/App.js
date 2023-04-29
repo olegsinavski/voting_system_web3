@@ -9,37 +9,6 @@ import contractABI from './artifacts/contracts/VotingSystem.sol/VotingSystem.jso
 
 // import { fetchCandidates, Candidates, AddCandidateBox, fetchCurrentWinner} from './candidates';
 
-import styled from 'styled-components';
-const StyledForm = styled.form`
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  margin-bottom: 2rem;
-`;
-
-
-const StyledButton = styled.button`
-  background-color: #007bff;
-  border: none;
-  color: white;
-  cursor: pointer;
-  font-size: 1rem;
-  padding: 0.5rem 1rem;
-  transition: background-color 0.2s;
-
-  &:hover {
-    background-color: #0056b3;
-  }
-`;
-
-
-const StyledInput = styled.input`
-  border: 1px solid #ced4da;
-  border-radius: 0.25rem;
-  font-size: 1rem;
-  padding: 0.5rem;
-`;
-
 function validateAddress(address) {
   try {
     ethers.utils.getAddress(address);
@@ -98,14 +67,13 @@ function useContract(provider, signerAddress, contractAddress) {
 
 
 export default function App() {
-  const contractAddress = '0x5FbDB2315678afecb367f032d93F642f64180aa3';
   const provider = useEthersProvider('http://127.0.0.1:8545');
-
+  const [contractAddress, setContractAddress] = useState('0x5FbDB2315678afecb367f032d93F642f64180aa3');
+  const [signers, setSigners] = useState([]);
   const [currentSignerAddress, setCurrentSignerAddress] = useState("");
 
   const votingSystem = useContract(provider, currentSignerAddress, contractAddress);
 
-  const [signers, setSigners] = useState([]);
   const [selectedSigner, setSelectedSigner] = useState(currentSignerAddress);
   useEffect(() => {
     const fetchSigners = async () => {
@@ -114,7 +82,7 @@ export default function App() {
         return;
       }
       // Fetch 5 first signers from the provider
-      const promises = [...Array(5).keys()].map(i => provider.getSigner(i).getAddress());
+      const promises = [...Array(10).keys()].map(i => provider.getSigner(i).getAddress());
       const results = await Promise.all(promises);
       setSigners(results);
       setCurrentSignerAddress(results[0]);
@@ -193,11 +161,19 @@ export default function App() {
     return <div> Connecting (waiting for provider)..</div>;
   }
 
+  async function onDeployNewContract() {
+    const signer = provider.getSigner(currentSignerAddress);
+    const bytecode = await provider.getCode(contractAddress);
+    console.log(contractABI.bytecode);
+    //setContractAddress(allContracts);
+  }
+
   if (!votingSystem) {
     return (<div>
       <p>Provider: {provider.connection.url}</p>
       <h3>You are {currentSignerAddress} </h3>
       <select value={selectedSigner} onChange={onSignerSelect}> {optionItems} </select>
+
     </div>);
   }
 
@@ -269,40 +245,57 @@ export default function App() {
   return (
     <div>
     <div className="container">
-      <div className="column">
-        <h3> Voting: {started ? "Started": "Not started"}</h3>
-        <h3> You {voted ? "have voted": "haven't voted"}</h3>
-        <button onClick={onToggleVoting}> 
-          {started ? "Finish": "Start"} voting!
-        </button>
+      <div className="wider-column">
+        <h3>Voting has <span className="status-indicator">{started ? "started": "not started"}</span>, you 
+          <span className="status-indicator">{voted ? " have voted": " haven't voted"}</span></h3>
+        <button className="action-button" onClick={onToggleVoting}>{started ? "Finish": "Start"} voting!</button>
         <form onSubmit={handleVoteSubmit}>
           <label>
             Vote for (candidate address):
-            <input type="text" value={voteInputValue} onChange={handleVoteInputChange} />
+            <input className="form-input" type="text" value={voteInputValue} onChange={handleVoteInputChange} />
           </label>
-          <button type="submit">Vote</button>
+          <button className="action-button" type="submit">Vote</button>
         </form>
         <form onSubmit={handleAddCandidateSubmit}>
           <label>
             Add candidate address:
-            <input type="text" value={candidateInputValue} onChange={handleCandidateInputChange} />
+            <input className="form-input" type="text" value={candidateInputValue} onChange={handleCandidateInputChange} />
           </label>
-          <button type="submit">Add</button>
+          <button className="action-button" type="submit">Add</button>
         </form>
         <h3>Current candidates:</h3>
-          {candidateList}
-        <h3> Current winner is {currentWinner}</h3>
+        <table className="candidate-table">
+        <thead>
+          <tr>
+            <th>Candidate Address</th>
+            <th>Number of Votes</th>
+          </tr>
+        </thead>
+        <tbody>
+          {candidates.map(candidate => (
+            <tr key={candidate.address}>
+              <td>{candidate.address}</td>
+              <td>{candidate.votes}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+        <h3>Current winner:</h3>
+        <div className="winner-container">
+          <div className="winner-address">{currentWinner}</div>
+        </div>
       </div>
 
-      <div className="column">
+      <div className="narrower-column">
+        <p>Network {provider.connection.url}</p>
+        <h3>Identity{isOwner ? " (admin):" : ":"} </h3>
+        <select value={selectedSigner} onChange={onSignerSelect}> {optionItems} </select>
+        {isOwner && (<div> <button className="action-button" onClick={onDeployNewContract}>Deploy new voting system</button> </div>)}
         {errorMessage && (
           <div className="error-popup">
             <p>{errorMessage}</p>
           </div>
         )}
-        <p>Network {provider.connection.url}</p>
-        <h3>Identity{isOwner ? " (admin):" : ":"} </h3>
-        <select value={selectedSigner} onChange={onSignerSelect}> {optionItems} </select>
       </div>
     </div>
     </div>
