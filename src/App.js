@@ -330,8 +330,9 @@ export default function App() {
 
   const startedPanel = (
     <div className="wider-column">
-      <h3>Voting has <span className="status-indicator">{started ? "started": "not started"}</span>, you 
-        <span className="status-indicator">{voted ? " have voted": " haven't voted"}</span>
+      <h3 id="voting-header" className={started ? (finished ? "finished" : "") : "not-started"}>
+        Voting has <span className={started ? (finished ? "finished" : "") : "not-started"}>{started ? "started": "not started"}</span>, you 
+        <span className={`status-indicator ${voted ? "voted" : "not-voted"}`} id="voting-status">{voted ? " have voted": " haven't voted"}</span>
       </h3>
       {currentWinner && (<div><h3>Current winner:</h3>
         <div className="winner-container">
@@ -362,8 +363,9 @@ export default function App() {
 
   const finishedPanel = (
     <div className="wider-column">
-      <h3>Voting has <span className="status-indicator">{started ? "started": "not started"}</span>, you 
-        <span className="status-indicator">{voted ? " have voted": " haven't voted"}</span>
+      <h3 id="voting-header" className={started ? (finished ? "finished" : "") : "not-started"}>
+        Voting has finished, you 
+        <span className={`status-indicator ${voted ? "voted" : "not-voted"}`} id="voting-status">{voted ? " have voted": " haven't voted"}</span>
       </h3>
       {currentWinner && (<div><h3>Current winner:</h3>
         <div className="winner-container">
@@ -394,7 +396,7 @@ export default function App() {
 
   return (
     <div className="container">
-      {started ? startedPanel: notStartedPanel}
+      {started ? startedPanel: (finished ? finishedPanel : notStartedPanel)}
       {adminPanel}
     </div>
   );

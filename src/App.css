@@ -146,3 +146,32 @@ form {
   border-bottom: 2px solid #333; /* Adds a border at the bottom */
   padding-bottom: 10px; /* Adds some padding at the bottom */
 }
+
+#voting-header {
+  text-align: center;
+  font-size: 24px;
+  font-family: Arial, sans-serif;
+  margin-top: 20px;
+  border-bottom: 2px solid #333;
+  padding-bottom: 10px;
+}
+
+.status-indicator {
+  color: orange; /* default color for voting in progress */
+}
+
+#voting-status.finished {
+  color: green; /* color for voting has ended */
+}
+
+#voting-status.not-started {
+  color: red; /* color for voting hasn't started */
+}
+
+.voted {
+  color: #00b894; /* green */
+}
+
+.not-voted {
+  color: #d63031; /* red */
+}
