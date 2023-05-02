@@ -83,15 +83,6 @@ select {
   margin-bottom: 10px;
 }
 
-.winner {
-  font-size: 24px;
-  margin-top: 10px;
-  background-color: #ffc107;
-  color: #222;
-  padding: 10px;
-  border-radius: 5px;
-}
-
 
 .candidate-table {
   border-collapse: collapse;
@@ -174,4 +165,36 @@ form {
 
 .not-voted {
   color: #d63031; /* red */
+}
+
+div.winner-container {
+  background-color: #1a1a1a;
+  border: 2px solid #CCCCCC;
+  border-radius: 5px;
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+/* Define styles for the winner heading */
+div.winner-container h3 {
+  font-size: 24px;
+  margin-bottom: 10px;
+  color: #CCCCCC;
+}
+
+/* Define styles for the winner text */
+div.winner-container div.winner-text {
+  font-size: 20px;
+  font-weight: bold;
+  color: #FFFFFF;
+  text-align: center;
+}
+
+/* Define styles for the winner highlight */
+div.winner-container div.winner-highlight {
+  font-size: 26px;
+  font-weight: bold;
+  color: #d93838;
+  text-align: center;
+  margin-top: 10px;
 }

@@ -129,13 +129,14 @@ export default function App() {
     };
   }, [errorMessage]);
 
-  function refreshAllVoting(votingSystem, started) {
+  function refreshAllVoting(votingSystem, started, finished) {
     if (!votingSystem) {
       return;
     }
     votingSystem.voted().then(setVoted);
     fetchCandidates(votingSystem).then(setCandidates);
-    if (started) {
+    if (started || finished) {
+      console.log("fetching winner", started, finished);
       fetchCurrentWinner(votingSystem).then(setCurrentWinner);
     } else {
       setCurrentWinner("");
@@ -155,8 +156,8 @@ export default function App() {
   }, [votingSystem, currentSignerAddress]);
 
   useEffect(() => {
-    refreshAllVoting(votingSystem, started);
-  }, [votingSystem, started]);
+    refreshAllVoting(votingSystem, started, finished);
+  }, [votingSystem, started, finished]);
 
   const [candidateInputValue, setCandidateInputValue] = useState('');
 
@@ -252,7 +253,7 @@ export default function App() {
       console.log(error)
       setErrorMessage(txErrorToHumanReadable(error));
     }
-      refreshAllVoting(votingSystem)
+    refreshAllVoting(votingSystem, started, finished)
   };
 
   const handleVoteInputChange = (event) => {
@@ -315,6 +316,17 @@ export default function App() {
     </div>
   );
 
+  const winnerPanel = (
+    currentWinner && (
+      <div class="winner-container">
+        <div>
+          <h3>Current winner:</h3>
+          <div class="winner-text">{currentWinner}</div>
+          {finished && <div class="winner-highlight">🎉 Winner! 🎉</div>}
+        </div>
+      </div>
+    )
+  );
 
 
   const notStartedPanel = (
@@ -343,11 +355,6 @@ export default function App() {
         Voting has <span className={started ? (finished ? "finished" : "") : "not-started"}>{started ? "started": "not started"}</span>, you 
         <span className={`status-indicator ${voted ? "voted" : "not-voted"}`} id="voting-status">{voted ? " have voted": " haven't voted"}</span>
       </h3>
-      {currentWinner && (<div><h3>Current winner:</h3>
-        <div className="winner-container">
-          <div className="winner-address">{currentWinner}</div>
-        </div>
-      </div>)}
       <div className="form-container">
         <form onSubmit={handleVoteSubmit}>
           <label className="form-label">
@@ -360,6 +367,7 @@ export default function App() {
           <button className="action-button" type="submit">Vote</button>
         </form>
       </div>
+      {winnerPanel}
       {candidatesPanel}
     </div>
   );
@@ -370,11 +378,7 @@ export default function App() {
         Voting has finished, you 
         <span className={`status-indicator ${voted ? "voted" : "not-voted"}`} id="voting-status">{voted ? " have voted": " haven't voted"}</span>
       </h3>
-      {currentWinner && (<div><h3>Current winner:</h3>
-        <div className="winner-container">
-          <div className="winner-address">{currentWinner}</div>
-        </div>
-      </div>)}
+      {winnerPanel}
       {candidatesPanel}
     </div>
   );
