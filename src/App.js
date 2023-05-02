@@ -259,57 +259,8 @@ export default function App() {
     setVoteInputValue(event.target.value);
   };
 
-  return (
-    <div>
-    <div className="container">
-      <div className="wider-column">
-        <h3>Voting has <span className="status-indicator">{started ? "started": "not started"}</span>, you 
-          <span className="status-indicator">{voted ? " have voted": " haven't voted"}</span>
-        </h3>
-        {currentWinner && (<div><h3>Current winner:</h3>
-        <div className="winner-container">
-          <div className="winner-address">{currentWinner}</div>
-        </div>
-        </div>)}
-          <div className="form-container">
-            <form onSubmit={handleAddCandidateSubmit}>
-              <label className="form-label">
-                Add candidate address:
-                </label>
-              <input className="form-input" type="text" value={candidateInputValue} onChange={handleCandidateInputChange} />
-              
-              <button className="action-button" type="submit">Add</button>
-            </form>
-            <form onSubmit={handleVoteSubmit}>
-              <label className="form-label">
-                Vote for (candidate address):</label>
-
-                <input className="form-input" type="text" value={voteInputValue} onChange={handleVoteInputChange} />
-              
-              <button className="action-button" type="submit">Vote</button>
-            </form>
-          </div>
-        <h3>Current candidates:</h3>
-        <table className="candidate-table">
-        <thead>
-          <tr>
-            <th>Candidate Address</th>
-            <th>Number of Votes</th>
-          </tr>
-        </thead>
-        <tbody>
-          {candidates.map(candidate => (
-            <tr key={candidate.address}>
-              <td>{candidate.address}</td>
-              <td>{candidate.votes}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-
-      </div>
-
-      <div className="narrower-column">
+  const adminPanel = (
+    <div className="narrower-column">
       <div className="narrower-column-internal">
         <h2>Administrator panel</h2>
         <p>Network {provider.connection.url}</p>
@@ -318,22 +269,133 @@ export default function App() {
         <select value={selectedSigner} onChange={onSignerSelect} 
           title="Select your identity from several available demo signers. Select admin identity for extra abilities"> {optionItems} </select>
         {isOwner && (<div style={{ display: 'flex', justifyContent: 'flex-start', alignItems: 'center' }}> 
-           <button className="action-button" onClick={onToggleVoting}>{started ? "Finish": "Start"} voting!</button>
-           <h4 style={{ margin: '10px'}}>You are the admin  </h4> 
+          <button className="action-button" onClick={onToggleVoting}>{started ? "Finish": "Start"} voting!</button>
+          <h4 style={{ margin: '10px'}}>You are the admin  </h4> 
           </div>)} 
         {!isOwner && (<p>You are a regular user</p>)}
-        <div> <button className="action-button" onClick={onDeployNewContract} 
+        <div> 
+          <button className="action-button" onClick={onDeployNewContract} 
               title="Deploy a fresh contract as a current user. This signer is going to be its admin">
-          Deploy new voting system 
-        </button> </div>
+            Deploy new voting system 
+          </button> 
+        </div>
         {errorMessage && (
           <div className="error-popup">
             <p>{errorMessage}</p>
           </div>
         )}
-        </div>
       </div>
     </div>
+  );
+
+
+  const candidatesPanel = (
+    <div>
+    <h3>Candidates:</h3>
+    <table className="candidate-table">
+      <thead>
+        <tr>
+          <th>Candidate Address</th>
+          <th>Number of Votes</th>
+        </tr>
+      </thead>
+      <tbody>
+        {candidates.map(candidate => (
+          <tr key={candidate.address}>
+            <td>{candidate.address}</td>
+            <td>{candidate.votes}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+    </div>
+  );
+
+  const notStartedPanel = (
+    <div className="wider-column">
+      <h3 className="centered">Voting has hasn't started
+      </h3>
+      <div className="form-container">
+        <form onSubmit={handleAddCandidateSubmit}>
+          <label className="form-label">
+            Add candidate address:
+            </label>
+          <input className="form-input" type="text" value={candidateInputValue} onChange={handleCandidateInputChange} />
+          <button className="action-button" type="submit">Add</button>
+        </form>
+      </div>
+      {candidatesPanel}
+    </div>
+  );
+
+  const startedPanel = (
+    <div className="wider-column">
+      <h3>Voting has <span className="status-indicator">{started ? "started": "not started"}</span>, you 
+        <span className="status-indicator">{voted ? " have voted": " haven't voted"}</span>
+      </h3>
+      {currentWinner && (<div><h3>Current winner:</h3>
+        <div className="winner-container">
+          <div className="winner-address">{currentWinner}</div>
+        </div>
+      </div>)}
+      <div className="form-container">
+        <form onSubmit={handleAddCandidateSubmit}>
+          <label className="form-label">
+            Add candidate address:
+            </label>
+          <input className="form-input" type="text" value={candidateInputValue} onChange={handleCandidateInputChange} />
+          
+          <button className="action-button" type="submit">Add</button>
+        </form>
+        <form onSubmit={handleVoteSubmit}>
+          <label className="form-label">
+            Vote for (candidate address):</label>
+
+            <input className="form-input" type="text" value={voteInputValue} onChange={handleVoteInputChange} />
+          
+          <button className="action-button" type="submit">Vote</button>
+        </form>
+      </div>
+      {candidatesPanel}
+    </div>
+  );
+
+  const finishedPanel = (
+    <div className="wider-column">
+      <h3>Voting has <span className="status-indicator">{started ? "started": "not started"}</span>, you 
+        <span className="status-indicator">{voted ? " have voted": " haven't voted"}</span>
+      </h3>
+      {currentWinner && (<div><h3>Current winner:</h3>
+        <div className="winner-container">
+          <div className="winner-address">{currentWinner}</div>
+        </div>
+      </div>)}
+      <div className="form-container">
+        <form onSubmit={handleAddCandidateSubmit}>
+          <label className="form-label">
+            Add candidate address:
+            </label>
+          <input className="form-input" type="text" value={candidateInputValue} onChange={handleCandidateInputChange} />
+          
+          <button className="action-button" type="submit">Add</button>
+        </form>
+        <form onSubmit={handleVoteSubmit}>
+          <label className="form-label">
+            Vote for (candidate address):</label>
+
+            <input className="form-input" type="text" value={voteInputValue} onChange={handleVoteInputChange} />
+          
+          <button className="action-button" type="submit">Vote</button>
+        </form>
+      </div>
+      {candidatesPanel}
+    </div>
+  );
+
+  return (
+    <div className="container">
+      {started ? startedPanel: notStartedPanel}
+      {adminPanel}
     </div>
   );
 

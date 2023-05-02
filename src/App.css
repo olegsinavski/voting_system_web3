@@ -136,3 +136,13 @@ form {
   border-radius: 5px;
   margin-bottom: 2px;
 }
+
+.centered {
+  text-align: center; /* Centers the text horizontally */
+  font-size: 24px; /* Sets the font size */
+  color: rgb(230, 190, 190); /* Sets the font color */
+  font-family: Arial, sans-serif; /* Sets the font family */
+  margin-top: 20px; /* Adds some top margin */
+  border-bottom: 2px solid #333; /* Adds a border at the bottom */
+  padding-bottom: 10px; /* Adds some padding at the bottom */
+}

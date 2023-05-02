@@ -31,7 +31,7 @@ contract VotingSystem is Ownable {
         require(finished == false, "Already finished");
         require(started == true, "Can't finish - voting hasn't started");
         started = false;
-        // finished = true;
+        finished = true;
     }
 
     function addCandidate(address candidate) public {
