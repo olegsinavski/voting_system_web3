@@ -96,17 +96,22 @@ export default function App() {
   }, [provider]);
 
   const [started, setStarted] = useState(false);
-  useEffect(() => {
-    refreshStarted(votingSystem);
-  }, [votingSystem]);
+  const [finished, setFinished] = useState(false);
 
-  async function refreshStarted(votingSystem) {
+  async function refreshStartedFinished(votingSystem) {
     if (!votingSystem) {
       return;
     }
     const startedValue = await votingSystem.started();
+    const finishedValue = await votingSystem.finished();
     setStarted(startedValue);
+    setFinished(finishedValue);
   };
+  
+  useEffect(() => {
+    refreshStartedFinished(votingSystem);
+  }, [votingSystem]);
+
 
   const [voted, setVoted] = useState(false);
   const [isOwner, setIsOwner] = useState(false);
@@ -179,11 +184,19 @@ export default function App() {
   }
 
   if (!votingSystem) {
-    return (<div>
-      <p>Provider: {provider.connection.url}</p>
-      <h3>You are {currentSignerAddress} </h3>
-      <select value={selectedSigner} onChange={onSignerSelect}> {optionItems} </select>
-      <div> <button className="action-button" onClick={onDeployNewContract}>Deploy new voting system</button> </div>
+    return (
+    <div className="narrower-column">
+      <div className="narrower-column-internal">
+        <h2>Administrator panel</h2>
+        <p>Provider: {provider.connection.url}</p>
+        <h3>Select identity: </h3>
+        <select value={selectedSigner} onChange={onSignerSelect} 
+          title="Select your identity from several available demo signers"> {optionItems} </select>
+        <div> <button className="action-button" onClick={onDeployNewContract}
+          title="Deploy a fresh contract as a current user who is going to be its admin">
+          Deploy new voting system
+        </button> </div>
+      </div>
     </div>);
   }
 
@@ -201,7 +214,7 @@ export default function App() {
       console.log(error)
       setErrorMessage(txErrorToHumanReadable(error));
     } 
-    refreshStarted(votingSystem);
+    refreshStartedFinished(votingSystem);
   }
 
   async function handleAddCandidateSubmit(event) {
@@ -246,12 +259,6 @@ export default function App() {
     setVoteInputValue(event.target.value);
   };
 
-  const candidateList = candidates.map(candidate => (
-    <div key={candidate.address}>
-        {candidate.address}: {candidate.votes}
-    </div>
-  ));
-
   return (
     <div>
     <div className="container">
@@ -264,7 +271,6 @@ export default function App() {
           <div className="winner-address">{currentWinner}</div>
         </div>
         </div>)}
-        
           <div className="form-container">
             <form onSubmit={handleAddCandidateSubmit}>
               <label className="form-label">
@@ -305,12 +311,21 @@ export default function App() {
 
       <div className="narrower-column">
       <div className="narrower-column-internal">
+        <h2>Administrator panel</h2>
         <p>Network {provider.connection.url}</p>
         <p>Contract {contractAddress}</p>
-        <h3>Identity{isOwner ? " (admin):" : ":"} </h3>
-        <select value={selectedSigner} onChange={onSignerSelect}> {optionItems} </select>
-        <div> {isOwner && <button className="action-button" onClick={onToggleVoting}>{started ? "Finish": "Start"} voting!</button>} </div>
-        <div> <button className="action-button" onClick={onDeployNewContract}>Deploy new voting system</button> </div>
+        <h3>Select identity:</h3>
+        <select value={selectedSigner} onChange={onSignerSelect} 
+          title="Select your identity from several available demo signers. Select admin identity for extra abilities"> {optionItems} </select>
+        {isOwner && (<div style={{ display: 'flex', justifyContent: 'flex-start', alignItems: 'center' }}> 
+           <button className="action-button" onClick={onToggleVoting}>{started ? "Finish": "Start"} voting!</button>
+           <h4 style={{ margin: '10px'}}>You are the admin  </h4> 
+          </div>)} 
+        {!isOwner && (<p>You are a regular user</p>)}
+        <div> <button className="action-button" onClick={onDeployNewContract} 
+              title="Deploy a fresh contract as a current user. This signer is going to be its admin">
+          Deploy new voting system 
+        </button> </div>
         {errorMessage && (
           <div className="error-popup">
             <p>{errorMessage}</p>
