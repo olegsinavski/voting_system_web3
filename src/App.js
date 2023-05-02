@@ -267,9 +267,13 @@ export default function App() {
         <p>Contract {contractAddress}</p>
         <h3>Select identity:</h3>
         <select value={selectedSigner} onChange={onSignerSelect} 
-          title="Select your identity from several available demo signers. Select admin identity for extra abilities"> {optionItems} </select>
-        {isOwner && (<div style={{ display: 'flex', justifyContent: 'flex-start', alignItems: 'center' }}> 
-          <button className="action-button" onClick={onToggleVoting}>{started ? "Finish": "Start"} voting!</button>
+          title="Select your identity from several available demo signers. Select admin identity for extra abilities"> 
+          {optionItems} 
+        </select>
+        {isOwner && !finished && (<div style={{ display: 'flex', justifyContent: 'flex-start', alignItems: 'center' }}> 
+          <button className="action-button" onClick={onToggleVoting}>
+            {started ? "Finish": "Start"} voting!
+          </button>
           <h4 style={{ margin: '10px'}}>You are the admin  </h4> 
           </div>)} 
         {!isOwner && (<p>You are a regular user</p>)}
@@ -311,18 +315,23 @@ export default function App() {
     </div>
   );
 
+
+
   const notStartedPanel = (
     <div className="wider-column">
       <h3 className="centered">Voting has hasn't started
       </h3>
       <div className="form-container">
-        <form onSubmit={handleAddCandidateSubmit}>
-          <label className="form-label">
-            Add candidate address:
-            </label>
-          <input className="form-input" type="text" value={candidateInputValue} onChange={handleCandidateInputChange} />
-          <button className="action-button" type="submit">Add</button>
-        </form>
+      <form onSubmit={handleAddCandidateSubmit}>
+        <label className="form-label">
+          Add candidate address:
+        </label>
+        <input className="form-input" type="text" list="candidateAddresses" value={candidateInputValue} onChange={handleCandidateInputChange} />
+        <datalist id="candidateAddresses">
+          {optionItems}
+        </datalist>
+        <button className="action-button" type="submit">Add</button>
+      </form>
       </div>
       {candidatesPanel}
     </div>
@@ -340,20 +349,14 @@ export default function App() {
         </div>
       </div>)}
       <div className="form-container">
-        <form onSubmit={handleAddCandidateSubmit}>
-          <label className="form-label">
-            Add candidate address:
-            </label>
-          <input className="form-input" type="text" value={candidateInputValue} onChange={handleCandidateInputChange} />
-          
-          <button className="action-button" type="submit">Add</button>
-        </form>
         <form onSubmit={handleVoteSubmit}>
           <label className="form-label">
-            Vote for (candidate address):</label>
-
-            <input className="form-input" type="text" value={voteInputValue} onChange={handleVoteInputChange} />
-          
+            Vote for (candidate address):
+          </label>
+          <input className="form-input" type="text" list="candidateAddresses" value={voteInputValue} onChange={handleVoteInputChange} />
+          <datalist id="candidateAddresses">
+            {optionItems}
+          </datalist>
           <button className="action-button" type="submit">Vote</button>
         </form>
       </div>
@@ -372,24 +375,6 @@ export default function App() {
           <div className="winner-address">{currentWinner}</div>
         </div>
       </div>)}
-      <div className="form-container">
-        <form onSubmit={handleAddCandidateSubmit}>
-          <label className="form-label">
-            Add candidate address:
-            </label>
-          <input className="form-input" type="text" value={candidateInputValue} onChange={handleCandidateInputChange} />
-          
-          <button className="action-button" type="submit">Add</button>
-        </form>
-        <form onSubmit={handleVoteSubmit}>
-          <label className="form-label">
-            Vote for (candidate address):</label>
-
-            <input className="form-input" type="text" value={voteInputValue} onChange={handleVoteInputChange} />
-          
-          <button className="action-button" type="submit">Vote</button>
-        </form>
-      </div>
       {candidatesPanel}
     </div>
   );
@@ -402,3 +387,53 @@ export default function App() {
   );
 
 };
+
+function YourComponent() {
+  const [selectedCandidate, setSelectedCandidate] = useState("");
+  const [candidateInputValue, setCandidateInputValue] = useState("");
+  const candidateList = ["Address 1", "Address 2", "Address 3"];
+
+  function handleSelectChange(event) {
+    setSelectedCandidate(event.target.value);
+    setCandidateInputValue(""); // clear the input field when an address is selected
+  }
+
+  function handleCandidateInputChange(event) {
+    setCandidateInputValue(event.target.value);
+    setSelectedCandidate(""); // clear the selected address when a new address is entered
+  }
+
+  function handleAddCandidateSubmit(event) {
+    event.preventDefault();
+    if (selectedCandidate) {
+      // handle adding the selected address
+    } else if (candidateInputValue) {
+      // handle adding the entered address
+    } else {
+      // handle error case where no address is selected or entered
+    }
+  }
+
+  return (
+    <form onSubmit={handleAddCandidateSubmit}>
+      <label className="form-label">
+        Add candidate address:
+      </label>
+      <div className="form-group">
+        <select className="form-select" value={selectedCandidate} onChange={handleSelectChange}>
+          <option value="">Select an address</option>
+          {candidateList.map((address, index) => (
+            <option key={index} value={address}>{address}</option>
+          ))}
+        </select>
+      </div>
+      <div className="form-group">
+        <label className="form-label">
+          Or enter a new address:
+        </label>
+        <input className="form-input" type="text" value={candidateInputValue} onChange={handleCandidateInputChange} />
+      </div>
+      <button className="action-button" type="submit">Add</button>
+    </form>
+  );
+}
