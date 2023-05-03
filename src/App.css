@@ -12,16 +12,8 @@ body {
   justify-content: space-between;
 }
 
-.column {
-  flex-basis: calc(50% - 20px);
-  margin-bottom: 20px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
 .wider-column {
-  flex-basis: calc(66.67% - 20px);
+  flex-basis: calc(66.67% - 100px);
 }
 
 .narrower-column {
@@ -47,6 +39,7 @@ body {
   color: #fff;
   padding: 10px;
   border-radius: 5px;
+  margin-top: 20px;
   margin-bottom: 20px;
 }
 
@@ -99,6 +92,10 @@ select {
 .candidate-table th {
   background-color: #020202;
   font-weight: bold;
+}
+
+.candidate-table td:nth-child(2) {
+  width: 30%;
 }
 
 
