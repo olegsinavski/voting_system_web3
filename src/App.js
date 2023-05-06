@@ -71,6 +71,7 @@ function useContract(provider, signerAddress, contractAddress) {
 
 export function useEthersProvider(endpoint, useMetaMask, setErrorMessage) {
   const [provider, setProvider] = useState(null);
+  const [networkName, setNetworkName] = useState("");
   
   useEffect(() => {
     const fetchProvider = async () => {
@@ -93,9 +94,22 @@ export function useEthersProvider(endpoint, useMetaMask, setErrorMessage) {
           }
         }
       } else if (endpoint) {
-        // Use specified provider endpoint
         const newProvider = new ethers.providers.JsonRpcProvider(endpoint);
-        setProvider(newProvider);
+        
+        const timeout = 3000; // Timeout in milliseconds
+        const timeoutPromise = new Promise((resolve, reject) => {
+          setTimeout(() => reject(new Error('Timeout')), timeout);
+        });
+        
+        try {
+          console.log('timeout')
+          await Promise.race([newProvider.ready, timeoutPromise]);
+          setProvider(newProvider);
+        } catch (error) {
+          console.log('setting error')
+          setErrorMessage("Local node is not available");
+          setProvider(null);
+        }
       } else {
         setErrorMessage("No Ethereum provider available");
         setProvider(null);
@@ -111,7 +125,24 @@ export function useEthersProvider(endpoint, useMetaMask, setErrorMessage) {
     };
   }, [endpoint, useMetaMask]);
 
-  return provider;
+  useEffect(() => {
+    const refreshNetworkName = async () => {
+      if (!provider) {
+        setNetworkName("");
+        return;
+      }
+      const network = await provider.getNetwork();
+      if (!useMetaMask && network.name === "unknown") {
+        setNetworkName(provider.connection.url);
+      } else {
+        setNetworkName(network.name);
+      }
+    }
+    refreshNetworkName();
+  }, [provider, useMetaMask]);
+    
+
+  return [provider, networkName];
 };
 
 
@@ -119,7 +150,7 @@ export function useEthersProvider(endpoint, useMetaMask, setErrorMessage) {
 export default function App() {
   const [errorMessage, setErrorMessage] = useState("");
   const [useMetaMask, setUseMetaMask] = useState(false);
-  const provider = useEthersProvider('http://127.0.0.1:8545', useMetaMask, setErrorMessage);
+  const [provider, networkName] = useEthersProvider('http://127.0.0.1:8545', useMetaMask, setErrorMessage);
   const [contractAddress, setContractAddress] = useState("");
   const [signers, setSigners] = useState([]);
   const [currentSignerAddress, setCurrentSignerAddress] = useState("");
@@ -172,6 +203,7 @@ export default function App() {
   const [currentWinner, setCurrentWinner] = useState("");
 
   useEffect(() => {
+    console.log("trigger error effect", errorMessage);
     const timer = setTimeout(() => {
       setErrorMessage("");
     }, 3000);
@@ -250,14 +282,14 @@ export default function App() {
 
   const providerSelection = (
     <div>
-    <div className="toggle-container">
-      <p>Choose provider:</p>
-      <div className={`toggle ${useMetaMask ? "active" : ""}`} onClick={toggleProvider}>
-        <div className="toggle-handle"></div>
+      <div className="provider-selector">
+        <label htmlFor="provider-select">Provider:</label>
+        <select id="provider-select" value={useMetaMask ? "metamask" : "local"} onChange={toggleProvider}>
+          <option value="local">Local node</option>
+          <option value="metamask">MetaMask</option>
+        </select>
       </div>
-      <p className="toggle-label">Using {useMetaMask ? "MetaMask" : "local node"}</p>
-    </div>
-    <p>Network {provider ? provider.connection.url: "(none)"}</p>
+    <p>Network {networkName ? networkName: "(none)"}</p>
     </div>
   );
 
@@ -270,7 +302,7 @@ export default function App() {
     </div>
   );
 
-
+  console.log("rendering wiht error", errorMessage);
   if (!votingSystem) {
     return (
     <div className="narrower-column">
