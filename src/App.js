@@ -3,7 +3,7 @@ import './App.css';
 
 import { ethers } from 'ethers';
 import { useState, useEffect } from 'react';
-import useEthersProvider from './ethersProvider';
+// import useEthersProvider from './ethersProvider';
 // import Signers from './signers';
 import contractABI from './artifacts/contracts/VotingSystem.sol/VotingSystem.json';
 
@@ -69,12 +69,65 @@ function useContract(provider, signerAddress, contractAddress) {
 };
 
 
+export function useEthersProvider(endpoint, useMetaMask, setErrorMessage) {
+  const [provider, setProvider] = useState(null);
+  
+  useEffect(() => {
+    const fetchProvider = async () => {
+      console.log("Connecting...");
+      if (useMetaMask) {
+        if (!window.ethereum) {
+          setProvider(null);
+          setErrorMessage("No Metamask extension installed");
+        } else {
+          // Use MetaMask provider
+          try {
+            await window.ethereum.enable();
+            const newProvider = new ethers.providers.Web3Provider(
+              window.ethereum
+            );
+            setProvider(newProvider);
+          } catch (error) {
+            setErrorMessage("Failed to connect to MetaMask:", error);
+            setProvider(null);
+          }
+        }
+      } else if (endpoint) {
+        // Use specified provider endpoint
+        const newProvider = new ethers.providers.JsonRpcProvider(endpoint);
+        setProvider(newProvider);
+      } else {
+        setErrorMessage("No Ethereum provider available");
+        setProvider(null);
+      }
+    };
+    fetchProvider();
+    return () => {
+      if (provider) {
+        console.log("Disconnecting");
+        provider.removeAllListeners();
+        // provider.connection.close();
+      }
+    };
+  }, [endpoint, useMetaMask]);
+
+  return provider;
+};
+
+
 
 export default function App() {
-  const provider = useEthersProvider('http://127.0.0.1:8545');
+  const [errorMessage, setErrorMessage] = useState("");
+  const [useMetaMask, setUseMetaMask] = useState(false);
+  const provider = useEthersProvider('http://127.0.0.1:8545', useMetaMask, setErrorMessage);
   const [contractAddress, setContractAddress] = useState("");
   const [signers, setSigners] = useState([]);
   const [currentSignerAddress, setCurrentSignerAddress] = useState("");
+
+  // const toggleProvider = () => {
+  //   setUseMetaMask(!useMetaMask);
+  //   setProvider(null); // Reset provider to force a re-fetch
+  // };
 
   const votingSystem = useContract(provider, currentSignerAddress, contractAddress);
 
@@ -117,7 +170,6 @@ export default function App() {
   const [isOwner, setIsOwner] = useState(false);
   const [candidates, setCandidates] = useState([]);
   const [currentWinner, setCurrentWinner] = useState("");
-  const [errorMessage, setErrorMessage] = useState("");
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -167,9 +219,9 @@ export default function App() {
     <option key={s} value={s}>{s}</option>
   );
 
-  if (!provider) {
-    return <div> Connecting (waiting for provider)..</div>;
-  }
+  // if (!provider) {
+  //   return <div> Connecting (waiting for provider)..</div>;
+  // }
 
   async function onDeployNewContract() {
     const signer = provider.getSigner(currentSignerAddress);
@@ -184,19 +236,54 @@ export default function App() {
     } 
   }
 
+  const deployButton = (
+    <div> <button className="action-button" onClick={onDeployNewContract}
+    title="Deploy a fresh contract as a current user who is going to be its admin">
+    Deploy new voting system
+   </button> 
+  </div>
+  );
+
+  const toggleProvider = () => {
+    setUseMetaMask(!useMetaMask);
+  };
+
+  const providerSelection = (
+    <div>
+    <div className="toggle-container">
+      <p>Choose provider:</p>
+      <div className={`toggle ${useMetaMask ? "active" : ""}`} onClick={toggleProvider}>
+        <div className="toggle-handle"></div>
+      </div>
+      <p className="toggle-label">Using {useMetaMask ? "MetaMask" : "local node"}</p>
+    </div>
+    <p>Network {provider ? provider.connection.url: "(none)"}</p>
+    </div>
+  );
+
+  const identitySelection = (
+    <div>
+    <h3>Select identity: </h3>
+    <select value={selectedSigner} onChange={onSignerSelect} 
+      title="Select your identity from several available demo signers"> {optionItems} 
+    </select>
+    </div>
+  );
+
+
   if (!votingSystem) {
     return (
     <div className="narrower-column">
       <div className="narrower-column-internal">
         <h2>Administrator panel</h2>
-        <p>Provider: {provider.connection.url}</p>
-        <h3>Select identity: </h3>
-        <select value={selectedSigner} onChange={onSignerSelect} 
-          title="Select your identity from several available demo signers"> {optionItems} </select>
-        <div> <button className="action-button" onClick={onDeployNewContract}
-          title="Deploy a fresh contract as a current user who is going to be its admin">
-          Deploy new voting system
-        </button> </div>
+        {providerSelection}
+        {identitySelection}
+        {deployButton}
+        {errorMessage && (
+          <div className="error-popup">
+            <p>{errorMessage}</p>
+          </div>
+        )}
       </div>
     </div>);
   }
@@ -264,13 +351,9 @@ export default function App() {
     <div className="narrower-column">
       <div className="narrower-column-internal">
         <h2>Administrator panel</h2>
-        <p>Network {provider.connection.url}</p>
+        {providerSelection}
         <p>Contract {contractAddress}</p>
-        <h3>Select identity:</h3>
-        <select value={selectedSigner} onChange={onSignerSelect} 
-          title="Select your identity from several available demo signers. Select admin identity for extra abilities"> 
-          {optionItems} 
-        </select>
+        {identitySelection}
         {isOwner && !finished && (<div style={{ display: 'flex', justifyContent: 'flex-start', alignItems: 'center' }}> 
           <button className="action-button" onClick={onToggleVoting}>
             {started ? "Finish": "Start"} voting!
@@ -278,12 +361,7 @@ export default function App() {
           <h4 style={{ margin: '10px'}}>You are the admin  </h4> 
           </div>)} 
         {!isOwner && (<p>You are a regular user</p>)}
-        <div> 
-          <button className="action-button" onClick={onDeployNewContract} 
-              title="Deploy a fresh contract as a current user. This signer is going to be its admin">
-            Deploy new voting system 
-          </button> 
-        </div>
+        {deployButton}
         {errorMessage && (
           <div className="error-popup">
             <p>{errorMessage}</p>
