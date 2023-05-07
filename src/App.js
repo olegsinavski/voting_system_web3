@@ -104,7 +104,7 @@ export function useEthersProvider(endpoint, useMetaMask, setErrorMessage) {
       } else if (endpoint) {
         const newProvider = new ethers.providers.JsonRpcProvider(endpoint);
         
-        const timeout = 3000; // Timeout in milliseconds
+        const timeout = 6000; // Timeout in milliseconds
         const timeoutPromise = new Promise((resolve, reject) => {
           setTimeout(() => reject(new Error('Timeout')), timeout);
         });
@@ -154,9 +154,19 @@ export function useEthersProvider(endpoint, useMetaMask, setErrorMessage) {
 };
 
 
+const Spinner = () => (
+<div className="loader_overlay">
+  <div className="loader_container">
+    <div className="loader"></div>
+  </div>
+</div>
+);
+
+
 
 export default function App() {
   const [errorMessage, setErrorMessage] = useState("");
+  const [loading, setLoading] = useState(false);
   const [useMetaMask, setUseMetaMask] = useState(false);
   const [provider, networkName] = useEthersProvider('http://127.0.0.1:8545', useMetaMask, setErrorMessage);
   const [contractAddress, setContractAddress] = useState("");
@@ -264,12 +274,14 @@ export default function App() {
     const signer = provider.getSigner(currentSignerAddress);
     const VotingFactory = new ethers.ContractFactory(contractABI.abi, contractABI.bytecode, signer);
     try {
+      setLoading(true);
       const contractInstance = await VotingFactory.deploy();
       await contractInstance.deployed();
       setContractAddress(contractInstance.address);
     } catch (error) {
       setErrorMessage(txErrorToHumanReadable(error));
     } 
+    setLoading(false);
   }
 
   const deployButton = (
@@ -314,8 +326,14 @@ export default function App() {
     )}
     </div>
   );
+
+
+
   if (!votingSystem) {
     return (
+    <div>
+    {loading && <Spinner/>}
+    
     <div className="narrower-column">
       <div className="narrower-column-internal">
         <h2>Administrator panel</h2>
@@ -328,6 +346,7 @@ export default function App() {
           </div>
         )}
       </div>
+    </div>
     </div>);
   }
 
@@ -338,6 +357,7 @@ export default function App() {
 
   async function onToggleVoting() {
     try {
+      setLoading(true);
       const tx = started ? await votingSystem.finishVoting() : await votingSystem.startVoting();
       const response = await tx.wait();
       console.log('Transaction response:', response);
@@ -345,6 +365,7 @@ export default function App() {
       console.log(error)
       setErrorMessage(txErrorToHumanReadable(error));
     } 
+    setLoading(false);
     refreshStartedFinished(votingSystem);
   }
 
@@ -355,6 +376,7 @@ export default function App() {
       return;
     }
     try {
+        setLoading(true);
         const tx = await votingSystem.addCandidate(candidateInputValue);
         const response = await tx.wait();
         console.log('Add candidate response:', response);
@@ -362,6 +384,7 @@ export default function App() {
         console.log(error)
         setErrorMessage(txErrorToHumanReadable(error));
     }
+    setLoading(false);
     fetchCandidates(votingSystem).then(setCandidates)
   };
 
@@ -376,6 +399,7 @@ export default function App() {
       return;
     }
     try {
+      setLoading(true);
       const tx = await votingSystem.vote(voteInputValue);
       const response = await tx.wait();
       console.log('Voting response:', response);
@@ -383,6 +407,7 @@ export default function App() {
       console.log(error)
       setErrorMessage(txErrorToHumanReadable(error));
     }
+    setLoading(false);
     refreshAllVoting(votingSystem, started, finished)
   };
 
@@ -506,6 +531,7 @@ export default function App() {
 
   return (
     <div className="container">
+      {loading && <Spinner/>}
       {started ? startedPanel: (finished ? finishedPanel : notStartedPanel)}
       {adminPanel}
     </div>
