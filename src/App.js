@@ -90,6 +90,7 @@ export function useEthersProvider(endpoint, useMetaMask, setErrorMessage) {
         } else {
           // Use MetaMask provider
           try {
+            await window.ethereum.enable();
             const newProvider = new ethers.providers.Web3Provider(
               window.ethereum
             );
