@@ -19,8 +19,15 @@ function validateAddress(address) {
 }
 
 function txErrorToHumanReadable(error) {
-  const message = error.error.error.data.message;
-  return message.split("reverted with reason string '")[1].slice(0, -1);
+  let message;
+  if (error.error && error.error.error && error.error.error.data && error.error.error.data.message) {
+    message = error.error.error.data.message;
+    return message.split("reverted with reason string '")[1].slice(0, -1);
+  } else if (error.reason) {
+    return error.reason;
+  } else {
+    return JSON.stringify(error);
+  }
 }
 
 export async function fetchCandidates(votingSystem) {
@@ -83,12 +90,13 @@ export function useEthersProvider(endpoint, useMetaMask, setErrorMessage) {
         } else {
           // Use MetaMask provider
           try {
-            await window.ethereum.enable();
             const newProvider = new ethers.providers.Web3Provider(
               window.ethereum
             );
+            await newProvider.send("eth_requestAccounts", []);
             setProvider(newProvider);
           } catch (error) {
+            console.log(error);
             setErrorMessage("Failed to connect to MetaMask:", error);
             setProvider(null);
           }
@@ -155,11 +163,6 @@ export default function App() {
   const [signers, setSigners] = useState([]);
   const [currentSignerAddress, setCurrentSignerAddress] = useState("");
 
-  // const toggleProvider = () => {
-  //   setUseMetaMask(!useMetaMask);
-  //   setProvider(null); // Reset provider to force a re-fetch
-  // };
-
   const votingSystem = useContract(provider, currentSignerAddress, contractAddress);
 
   const [selectedSigner, setSelectedSigner] = useState(currentSignerAddress);
@@ -169,15 +172,21 @@ export default function App() {
         setSigners([]);
         return;
       }
-      // Fetch 5 first signers from the provider
-      const promises = [...Array(10).keys()].map(i => provider.getSigner(i).getAddress());
+      let promises = [];
+      if (provider.connection.url === "metamask") {
+        // get single metamask signer
+        promises = [provider.getSigner().getAddress()];
+      } else {
+        // Fetch few first signers from the local provider
+        promises = [...Array(10).keys()].map(i => provider.getSigner(i).getAddress());
+      }
       const results = await Promise.all(promises);
       setSigners(results);
       setCurrentSignerAddress(results[0]);
       setSelectedSigner(results[0]);
     };
     fetchSigners();
-  }, [provider]);
+  }, [provider, useMetaMask]);
 
   const [started, setStarted] = useState(false);
   const [finished, setFinished] = useState(false);
@@ -251,10 +260,6 @@ export default function App() {
     <option key={s} value={s}>{s}</option>
   );
 
-  // if (!provider) {
-  //   return <div> Connecting (waiting for provider)..</div>;
-  // }
-
   async function onDeployNewContract() {
     const signer = provider.getSigner(currentSignerAddress);
     const VotingFactory = new ethers.ContractFactory(contractABI.abi, contractABI.bytecode, signer);
@@ -263,7 +268,6 @@ export default function App() {
       await contractInstance.deployed();
       setContractAddress(contractInstance.address);
     } catch (error) {
-      console.log(error)
       setErrorMessage(txErrorToHumanReadable(error));
     } 
   }
@@ -295,14 +299,21 @@ export default function App() {
 
   const identitySelection = (
     <div>
-    <h3>Select identity: </h3>
-    <select value={selectedSigner} onChange={onSignerSelect} 
-      title="Select your identity from several available demo signers"> {optionItems} 
-    </select>
+    {signers.length == 1 ? (
+      <div>
+      <h3>Your identity:</h3>
+      <h4>{signers[0]}</h4>
+      </div>
+    ): (
+      <div>
+      <h3>Select identity:</h3>
+      <select value={selectedSigner} onChange={onSignerSelect} 
+        title="Select your identity from several available demo signers"> {optionItems} 
+      </select>
+      </div>
+    )}
     </div>
   );
-
-  console.log("rendering wiht error", errorMessage);
   if (!votingSystem) {
     return (
     <div className="narrower-column">
@@ -428,11 +439,11 @@ export default function App() {
 
   const winnerPanel = (
     currentWinner && (
-      <div class="winner-container">
+      <div className="winner-container">
         <div>
           <h3>Current winner:</h3>
-          <div class="winner-text">{currentWinner}</div>
-          {finished && <div class="winner-highlight">🎉 Winner! 🎉</div>}
+          <div className="winner-text">{currentWinner}</div>
+          {finished && <div className="winner-highlight">🎉 Winner! 🎉</div>}
         </div>
       </div>
     )
