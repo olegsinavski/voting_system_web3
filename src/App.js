@@ -2,55 +2,14 @@
 import './App.css';
 
 import { ethers } from 'ethers';
+import { validateAddress, txErrorToHumanReadable } from './utils';
 import { useState, useEffect } from 'react';
-// import useEthersProvider from './ethersProvider';
+import { useEthersProvider } from './ethersProvider';
 // import Signers from './signers';
 import contractABI from './artifacts/contracts/VotingSystem.sol/VotingSystem.json';
 
-// import { fetchCandidates, Candidates, AddCandidateBox, fetchCurrentWinner} from './candidates';
-
-function validateAddress(address) {
-  try {
-    ethers.utils.getAddress(address);
-    return true;
-  } catch (e) {
-    return false;
-  }
-}
-
-function txErrorToHumanReadable(error) {
-  let message;
-  if (error.error && error.error.error && error.error.error.data && error.error.error.data.message) {
-    message = error.error.error.data.message;
-    return message.split("reverted with reason string '")[1].slice(0, -1);
-  } else if (error.reason) {
-    return error.reason;
-  } else {
-    return JSON.stringify(error);
-  }
-}
-
-export async function fetchCandidates(votingSystem) {
-  if (!votingSystem) {
-      return [];
-  }
-  const numberOfCandidates = await votingSystem.getCandidateSize();
-  let candidateVotes = [];
-  for (let index = 0; index < numberOfCandidates; index++) {
-      const candidate = await votingSystem.getCandidate(index);
-      const votes = await votingSystem.getCandidateVotes(candidate);
-      candidateVotes.push({ address: candidate, votes: votes.toString() });
-  }
-  return candidateVotes;
-};
-
-
-export async function fetchCurrentWinner(votingSystem) {
-  if (!votingSystem) {
-      return [];
-  }
-  return await votingSystem.currentWinner();
-};
+import { fetchCandidates, fetchCurrentWinner} from './candidates';
+import Spinner from './spinner';
 
 
 function useContract(provider, signerAddress, contractAddress) {
@@ -74,95 +33,6 @@ function useContract(provider, signerAddress, contractAddress) {
   }, [provider, signerAddress, contractAddress]);
   return contract;
 };
-
-
-export function useEthersProvider(endpoint, useMetaMask, setErrorMessage) {
-  const [provider, setProvider] = useState(null);
-  const [networkName, setNetworkName] = useState("");
-  
-  useEffect(() => {
-    const fetchProvider = async () => {
-      console.log("Connecting...");
-      if (useMetaMask) {
-        if (!window.ethereum) {
-          setProvider(null);
-          setErrorMessage("No Metamask extension installed");
-        } else {
-          // Use MetaMask provider
-          try {
-            await window.ethereum.enable();
-            const newProvider = new ethers.providers.Web3Provider(
-              window.ethereum
-            );
-            await newProvider.send("eth_requestAccounts", []);
-            setProvider(newProvider);
-          } catch (error) {
-            console.log(error);
-            setErrorMessage("Failed to connect to MetaMask:", error);
-            setProvider(null);
-          }
-        }
-      } else if (endpoint) {
-        const newProvider = new ethers.providers.JsonRpcProvider(endpoint);
-        
-        const timeout = 6000; // Timeout in milliseconds
-        const timeoutPromise = new Promise((resolve, reject) => {
-          setTimeout(() => reject(new Error('Timeout')), timeout);
-        });
-        
-        try {
-          console.log('timeout')
-          await Promise.race([newProvider.ready, timeoutPromise]);
-          setProvider(newProvider);
-        } catch (error) {
-          console.log('setting error')
-          setErrorMessage("Local node is not available");
-          setProvider(null);
-        }
-      } else {
-        setErrorMessage("No Ethereum provider available");
-        setProvider(null);
-      }
-    };
-    fetchProvider();
-    return () => {
-      if (provider) {
-        console.log("Disconnecting");
-        provider.removeAllListeners();
-        // provider.connection.close();
-      }
-    };
-  }, [endpoint, useMetaMask]);
-
-  useEffect(() => {
-    const refreshNetworkName = async () => {
-      if (!provider) {
-        setNetworkName("");
-        return;
-      }
-      const network = await provider.getNetwork();
-      if (!useMetaMask && network.name === "unknown") {
-        setNetworkName(provider.connection.url);
-      } else {
-        setNetworkName(network.name);
-      }
-    }
-    refreshNetworkName();
-  }, [provider, useMetaMask]);
-    
-
-  return [provider, networkName];
-};
-
-
-const Spinner = () => (
-<div className="loader_overlay">
-  <div className="loader_container">
-    <div className="loader"></div>
-  </div>
-</div>
-);
-
 
 
 export default function App() {
