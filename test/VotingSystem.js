@@ -34,10 +34,19 @@ describe("VotingSystem", function () {
       expect(await votingSystem.owner()).to.equal(owner.address);
     });
 
+    it("Can't start with empty candidates", async function () {
+      const { votingSystem, owner, otherAccount } = await loadFixture(deployVotingSystem);
+
+      await expect(votingSystem.startVoting()).to.be.revertedWith(
+          "Can't start with 0 candidates"
+      );
+    });
+
     it("Starting and stopping voting", async function () {
       const { votingSystem, owner, anotherAccount } = await loadFixture(deployVotingSystem);
       expect(await votingSystem.started()).to.equal(false);
       expect(await votingSystem.finished()).to.equal(false);
+      await expect(votingSystem.addCandidate(owner.address)).not.to.be.reverted;
 
       await expect(votingSystem.finishVoting()).to.be.revertedWith(
           "Can't finish - voting hasn't started"
@@ -66,6 +75,7 @@ describe("VotingSystem", function () {
 
     it("Can't start and stop from another account", async function () {
       const { votingSystem, owner, otherAccount } = await loadFixture(deployVotingSystem);
+      await expect(votingSystem.addCandidate(otherAccount.address)).not.to.be.reverted;
 
       await expect(votingSystem.connect(otherAccount).startVoting()).to.be.revertedWith(
           "Ownable: caller is not the owner"
@@ -141,6 +151,7 @@ describe("VotingSystem", function () {
 
     it("Voting for non-existent", async function () {
       const { votingSystem, owner, otherAccount } = await loadFixture(deployVotingSystem);
+      await expect(votingSystem.addCandidate(owner.address)).not.to.be.reverted;
       await expect(votingSystem.startVoting()).not.to.be.reverted;
       await expect(votingSystem.vote(otherAccount.address)).to.be.revertedWith(
         "Candidate is not registered"

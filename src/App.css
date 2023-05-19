@@ -196,6 +196,15 @@ div.winner-container div.winner-highlight {
   margin-top: 10px;
 }
 
+/* Define styles for the no votes message */
+div.winner-container div.no-votes-message {
+  font-size: 18px;
+  font-weight: bold;
+  color: #555555;
+  text-align: center;
+  margin-top: 10px;
+}
+
 .dropbtn {
   background-color: #4CAF50;
   color: white;

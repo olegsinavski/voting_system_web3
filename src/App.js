@@ -5,34 +5,12 @@ import { ethers } from 'ethers';
 import { validateAddress, txErrorToHumanReadable } from './utils';
 import { useState, useEffect } from 'react';
 import { useEthersProvider } from './ethersProvider';
-// import Signers from './signers';
+import { useContract } from './contract';
+import { useSigners } from './signers';
 import contractABI from './artifacts/contracts/VotingSystem.sol/VotingSystem.json';
 
 import { fetchCandidates, fetchCurrentWinner} from './candidates';
 import Spinner from './spinner';
-
-
-function useContract(provider, signerAddress, contractAddress) {
-  const [contract, setContract] = useState(null);
-  useEffect(() => {
-    if (!provider) {
-      setContract(null);
-      return;
-    }
-    if (!signerAddress) {
-      setContract(null);
-      return;
-    }
-    if (!contractAddress) {
-      setContract(null);
-      return;
-    }
-    const signer = provider.getSigner(signerAddress);
-    const contract = new ethers.Contract(contractAddress, contractABI.abi, signer);
-    setContract(contract);
-  }, [provider, signerAddress, contractAddress]);
-  return contract;
-};
 
 
 export default function App() {
@@ -41,33 +19,10 @@ export default function App() {
   const [useMetaMask, setUseMetaMask] = useState(false);
   const [provider, networkName] = useEthersProvider('http://127.0.0.1:8545', useMetaMask, setErrorMessage);
   const [contractAddress, setContractAddress] = useState("");
-  const [signers, setSigners] = useState([]);
-  const [currentSignerAddress, setCurrentSignerAddress] = useState("");
 
-  const votingSystem = useContract(provider, currentSignerAddress, contractAddress);
+  const {signers, currentSignerAddress, setCurrentSignerAddress}  = useSigners(provider);
 
-  const [selectedSigner, setSelectedSigner] = useState(currentSignerAddress);
-  useEffect(() => {
-    const fetchSigners = async () => {
-      if (!provider) {
-        setSigners([]);
-        return;
-      }
-      let promises = [];
-      if (provider.connection.url === "metamask") {
-        // get single metamask signer
-        promises = [provider.getSigner().getAddress()];
-      } else {
-        // Fetch few first signers from the local provider
-        promises = [...Array(10).keys()].map(i => provider.getSigner(i).getAddress());
-      }
-      const results = await Promise.all(promises);
-      setSigners(results);
-      setCurrentSignerAddress(results[0]);
-      setSelectedSigner(results[0]);
-    };
-    fetchSigners();
-  }, [provider, useMetaMask]);
+  const votingSystem = useContract(provider, currentSignerAddress, contractAddress, contractABI.abi);
 
   const [started, setStarted] = useState(false);
   const [finished, setFinished] = useState(false);
@@ -134,7 +89,6 @@ export default function App() {
   }, [votingSystem, started, finished]);
 
   const [candidateInputValue, setCandidateInputValue] = useState('');
-
   const [voteInputValue, setVoteInputValue] = useState('');
 
   const optionItems = signers.map(s => 
@@ -163,15 +117,16 @@ export default function App() {
   </div>
   );
 
-  const toggleProvider = () => {
-    setUseMetaMask(!useMetaMask);
-  };
 
   const providerSelection = (
     <div>
       <div className="provider-selector">
         <label htmlFor="provider-select">Provider:</label>
-        <select id="provider-select" value={useMetaMask ? "metamask" : "local"} onChange={toggleProvider}>
+        <select 
+          id="provider-select" 
+          value={useMetaMask ? "metamask" : "local"} 
+          onChange={() => setUseMetaMask(!useMetaMask)}
+        >
           <option value="local">Local node</option>
           <option value="metamask">MetaMask</option>
         </select>
@@ -190,15 +145,19 @@ export default function App() {
     ): (
       <div>
       <h3>Select identity:</h3>
-      <select value={selectedSigner} onChange={onSignerSelect} 
-        title="Select your identity from several available demo signers"> {optionItems} 
+      <select 
+        value={currentSignerAddress} 
+        onChange={(event) => setCurrentSignerAddress(event.target.value)} 
+        title="Select your identity from several available demo signers"
+      > 
+        {signers.map(s => 
+          <option key={s} value={s}>{s}</option>
+        )} 
       </select>
       </div>
     )}
     </div>
   );
-
-
 
   if (!votingSystem) {
     return (
@@ -219,11 +178,6 @@ export default function App() {
       </div>
     </div>
     </div>);
-  }
-
-  function onSignerSelect(event) {
-    setCurrentSignerAddress(event.target.value);
-    setSelectedSigner(event.target.value);
   }
 
   async function onToggleVoting() {
@@ -334,15 +288,17 @@ export default function App() {
   );
 
   const winnerPanel = (
-    currentWinner && (
-      <div className="winner-container">
+    <div className="winner-container">
+      {currentWinner ? (
         <div>
           <h3>Current winner:</h3>
           <div className="winner-text">{currentWinner}</div>
           {finished && <div className="winner-highlight">🎉 Winner! 🎉</div>}
         </div>
-      </div>
-    )
+      ) : (
+        <div className="no-votes-message">No votes have been casted</div>
+      )}
+    </div>
   );
 
 

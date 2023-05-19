@@ -24,6 +24,7 @@ contract VotingSystem is Ownable {
     function startVoting() public onlyOwner {
         require(finished == false, "Can't start voting second time");
         require(started == false, "Can't start - voting is in progress");
+        require(getCandidateSize() > 0, "Can't start with 0 candidates");
         started = true;
     }
 
