@@ -80,3 +80,22 @@ export function useEthersProvider(endpoint, useMetaMask, setErrorMessage) {
   return [provider, networkName];
 };
 
+
+export const ProviderSelection = ({ useMetaMask, setUseMetaMask, networkName }) => {
+  return (
+    <div>
+      <div className="provider-selector">
+        <label htmlFor="provider-select">Provider:</label>
+        <select
+          id="provider-select"
+          value={useMetaMask ? 'metamask' : 'local'}
+          onChange={() => setUseMetaMask(!useMetaMask)}
+        >
+          <option value="local">Local node</option>
+          <option value="metamask">MetaMask</option>
+        </select>
+      </div>
+      <p>Network {networkName ? networkName : '(none)'}</p>
+    </div>
+  );
+};

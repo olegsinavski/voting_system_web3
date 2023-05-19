@@ -4,12 +4,12 @@ import './App.css';
 import { ethers } from 'ethers';
 import { validateAddress, txErrorToHumanReadable } from './utils';
 import { useState, useEffect } from 'react';
-import { useEthersProvider } from './ethersProvider';
+import { useEthersProvider, ProviderSelection } from './ethersProvider';
 import { useContract } from './contract';
-import { useSigners } from './signers';
+import { useSigners, IdentityPanel } from './signers';
 import contractABI from './artifacts/contracts/VotingSystem.sol/VotingSystem.json';
 
-import { fetchCandidates, fetchCurrentWinner} from './candidates';
+import { fetchCandidates, fetchCurrentWinner, CandidatesPanel, WinnerPanel} from './candidates';
 import Spinner from './spinner';
 
 
@@ -70,7 +70,6 @@ export default function App() {
     } else {
       setCurrentWinner("");
     }
-    
   }
 
   useEffect(() => {
@@ -117,48 +116,6 @@ export default function App() {
   </div>
   );
 
-
-  const providerSelection = (
-    <div>
-      <div className="provider-selector">
-        <label htmlFor="provider-select">Provider:</label>
-        <select 
-          id="provider-select" 
-          value={useMetaMask ? "metamask" : "local"} 
-          onChange={() => setUseMetaMask(!useMetaMask)}
-        >
-          <option value="local">Local node</option>
-          <option value="metamask">MetaMask</option>
-        </select>
-      </div>
-    <p>Network {networkName ? networkName: "(none)"}</p>
-    </div>
-  );
-
-  const identitySelection = (
-    <div>
-    {signers.length == 1 ? (
-      <div>
-      <h3>Your identity:</h3>
-      <h4>{signers[0]}</h4>
-      </div>
-    ): (
-      <div>
-      <h3>Select identity:</h3>
-      <select 
-        value={currentSignerAddress} 
-        onChange={(event) => setCurrentSignerAddress(event.target.value)} 
-        title="Select your identity from several available demo signers"
-      > 
-        {signers.map(s => 
-          <option key={s} value={s}>{s}</option>
-        )} 
-      </select>
-      </div>
-    )}
-    </div>
-  );
-
   if (!votingSystem) {
     return (
     <div>
@@ -167,8 +124,16 @@ export default function App() {
     <div className="narrower-column">
       <div className="narrower-column-internal">
         <h2>Administrator panel</h2>
-        {providerSelection}
-        {identitySelection}
+        <ProviderSelection
+          useMetaMask={useMetaMask}
+          setUseMetaMask={setUseMetaMask}
+          networkName={networkName}
+        />
+        <IdentityPanel
+          signers={signers}
+          currentSignerAddress={currentSignerAddress}
+          setCurrentSignerAddress={setCurrentSignerAddress}
+        />
         {deployButton}
         {errorMessage && (
           <div className="error-popup">
@@ -244,9 +209,17 @@ export default function App() {
     <div className="narrower-column">
       <div className="narrower-column-internal">
         <h2>Administrator panel</h2>
-        {providerSelection}
+        <ProviderSelection
+          useMetaMask={useMetaMask}
+          setUseMetaMask={setUseMetaMask}
+          networkName={networkName}
+        />
         <p>Contract {contractAddress}</p>
-        {identitySelection}
+        <IdentityPanel
+          signers={signers}
+          currentSignerAddress={currentSignerAddress}
+          setCurrentSignerAddress={setCurrentSignerAddress}
+        />
         {isOwner && !finished && (<div style={{ display: 'flex', justifyContent: 'flex-start', alignItems: 'center' }}> 
           <button className="action-button" onClick={onToggleVoting}>
             {started ? "Finish": "Start"} voting!
@@ -264,44 +237,6 @@ export default function App() {
     </div>
   );
 
-
-  const candidatesPanel = (
-    <div>
-    <h3>Candidates:</h3>
-    <table className="candidate-table">
-      <thead>
-        <tr>
-          <th>Candidate Address</th>
-          <th>Number of Votes</th>
-        </tr>
-      </thead>
-      <tbody>
-        {candidates.map(candidate => (
-          <tr key={candidate.address}>
-            <td>{candidate.address}</td>
-            <td>{candidate.votes}</td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
-    </div>
-  );
-
-  const winnerPanel = (
-    <div className="winner-container">
-      {currentWinner ? (
-        <div>
-          <h3>Current winner:</h3>
-          <div className="winner-text">{currentWinner}</div>
-          {finished && <div className="winner-highlight">🎉 Winner! 🎉</div>}
-        </div>
-      ) : (
-        <div className="no-votes-message">No votes have been casted</div>
-      )}
-    </div>
-  );
-
-
   const notStartedPanel = (
     <div className="wider-column">
       <h3 className="centered">Voting has hasn't started
@@ -318,7 +253,7 @@ export default function App() {
         <button className="action-button" type="submit">Add</button>
       </form>
       </div>
-      {candidatesPanel}
+      <CandidatesPanel candidates={candidates} />
     </div>
   );
 
@@ -340,8 +275,8 @@ export default function App() {
           <button className="action-button" type="submit">Vote</button>
         </form>
       </div>
-      {winnerPanel}
-      {candidatesPanel}
+      <WinnerPanel currentWinner={currentWinner} finished={finished} />
+      <CandidatesPanel candidates={candidates} />
     </div>
   );
 
@@ -351,8 +286,8 @@ export default function App() {
         Voting has finished, you 
         <span className={`status-indicator ${voted ? "voted" : "not-voted"}`} id="voting-status">{voted ? " have voted": " haven't voted"}</span>
       </h3>
-      {winnerPanel}
-      {candidatesPanel}
+      <WinnerPanel currentWinner={currentWinner} finished={finished} />
+      <CandidatesPanel candidates={candidates} />
     </div>
   );
 
