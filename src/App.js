@@ -77,6 +77,42 @@ export default function App() {
     <option key={s} value={s}>{s}</option>
   );
 
+  const adminPanel = (
+    <div className="narrower-column">
+      <div className="narrower-column-internal">
+        <h2>Administrator panel</h2>
+        <ProviderSelection
+          useMetaMask={useMetaMask}
+          setUseMetaMask={setUseMetaMask}
+          networkName={networkName}
+        />
+        <p>Contract {contractAddress}</p>
+        <IdentityPanel
+          signers={signers}
+          currentSignerAddress={currentSignerAddress}
+          setCurrentSignerAddress={setCurrentSignerAddress}
+        />
+        <StartStopVotingButton
+          isOwner={isOwner}
+          started={started}
+          finished={finished}
+          votingSystem={votingSystem}
+          refreshStartedFinished={refreshStartedFinished}
+          setLoading={setLoading}
+          setErrorMessage={setErrorMessage}
+        />
+        <DeployContractButton
+          provider={provider}
+          currentSignerAddress={currentSignerAddress}
+          contractABI={contractABI}
+          setLoading={setLoading}
+          setContractAddress={setContractAddress}
+          setErrorMessage={setErrorMessage}
+        />
+        <ErrorPopup errorMessage={errorMessage} />
+      </div>
+    </div>
+  );
 
   if (!votingSystem) {
     return (
@@ -132,6 +168,26 @@ export default function App() {
       setCandidateInputValue(event.target.value);
   };
 
+  const notStartedPanel = (
+    <div className="wider-column">
+      <h3 className="centered">Voting has hasn't started
+      </h3>
+      <div className="form-container">
+      <form onSubmit={handleAddCandidateSubmit}>
+        <label className="form-label">
+          Add candidate address:
+        </label>
+        <input className="form-input" type="text" list="candidateAddresses" value={candidateInputValue} onChange={handleCandidateInputChange} />
+        <datalist id="candidateAddresses">
+          {optionItems}
+        </datalist>
+        <button className="action-button" type="submit">Add</button>
+      </form>
+      </div>
+      <CandidatesPanel candidates={candidates} />
+    </div>
+  );
+
   async function handleVoteSubmit(event) {
     event.preventDefault();
     if (!validateAddress(voteInputValue)) {
@@ -154,63 +210,6 @@ export default function App() {
   const handleVoteInputChange = (event) => {
     setVoteInputValue(event.target.value);
   };
-
-  const adminPanel = (
-    <div className="narrower-column">
-      <div className="narrower-column-internal">
-        <h2>Administrator panel</h2>
-        <ProviderSelection
-          useMetaMask={useMetaMask}
-          setUseMetaMask={setUseMetaMask}
-          networkName={networkName}
-        />
-        <p>Contract {contractAddress}</p>
-        <IdentityPanel
-          signers={signers}
-          currentSignerAddress={currentSignerAddress}
-          setCurrentSignerAddress={setCurrentSignerAddress}
-        />
-        <StartStopVotingButton
-          isOwner={isOwner}
-          started={started}
-          finished={finished}
-          votingSystem={votingSystem}
-          refreshStartedFinished={refreshStartedFinished}
-          setLoading={setLoading}
-          setErrorMessage={setErrorMessage}
-        />
-        <DeployContractButton
-          provider={provider}
-          currentSignerAddress={currentSignerAddress}
-          contractABI={contractABI}
-          setLoading={setLoading}
-          setContractAddress={setContractAddress}
-          setErrorMessage={setErrorMessage}
-        />
-        <ErrorPopup errorMessage={errorMessage} />
-      </div>
-    </div>
-  );
-
-  const notStartedPanel = (
-    <div className="wider-column">
-      <h3 className="centered">Voting has hasn't started
-      </h3>
-      <div className="form-container">
-      <form onSubmit={handleAddCandidateSubmit}>
-        <label className="form-label">
-          Add candidate address:
-        </label>
-        <input className="form-input" type="text" list="candidateAddresses" value={candidateInputValue} onChange={handleCandidateInputChange} />
-        <datalist id="candidateAddresses">
-          {optionItems}
-        </datalist>
-        <button className="action-button" type="submit">Add</button>
-      </form>
-      </div>
-      <CandidatesPanel candidates={candidates} />
-    </div>
-  );
 
   const startedPanel = (
     <div className="wider-column">
