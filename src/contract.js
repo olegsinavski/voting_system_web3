@@ -23,3 +23,20 @@ export function useContract(provider, signerAddress, contractAddress, abi) {
     }, [provider, signerAddress, contractAddress]);
     return contract;
 };
+
+
+export function useIsOwner(votingSystem, currentSignerAddress) {
+    const [isOwner, setIsOwner] = useState(false);
+    useEffect(() => {
+      const refreshOwner = async () => {
+        if (!votingSystem) {
+          return;
+        }
+        const ownerAddress = await votingSystem.owner();
+        setIsOwner(ownerAddress === currentSignerAddress);
+      }
+      refreshOwner();
+    }, [votingSystem, currentSignerAddress]);
+    return isOwner;
+}
+

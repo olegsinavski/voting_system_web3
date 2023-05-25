@@ -5,8 +5,9 @@ import { ethers } from 'ethers';
 import { validateAddress, txErrorToHumanReadable } from './utils';
 import { useState, useEffect } from 'react';
 import { useEthersProvider, ProviderSelection } from './ethersProvider';
-import { useContract } from './contract';
+import { useContract, useIsOwner } from './contract';
 import { useSigners, IdentityPanel } from './signers';
+import { useDisappearingError } from './error';
 import contractABI from './artifacts/contracts/VotingSystem.sol/VotingSystem.json';
 
 import { fetchCandidates, fetchCurrentWinner, CandidatesPanel, WinnerPanel} from './candidates';
@@ -14,7 +15,8 @@ import Spinner from './spinner';
 
 
 export default function App() {
-  const [errorMessage, setErrorMessage] = useState("");
+  const [errorMessage, setErrorMessage] = useDisappearingError();
+
   const [loading, setLoading] = useState(false);
   const [useMetaMask, setUseMetaMask] = useState(false);
   const [provider, networkName] = useEthersProvider('http://127.0.0.1:8545', useMetaMask, setErrorMessage);
@@ -43,20 +45,12 @@ export default function App() {
 
 
   const [voted, setVoted] = useState(false);
-  const [isOwner, setIsOwner] = useState(false);
+  const isOwner = useIsOwner(votingSystem, currentSignerAddress);
+
+
   const [candidates, setCandidates] = useState([]);
   const [currentWinner, setCurrentWinner] = useState("");
 
-  useEffect(() => {
-    console.log("trigger error effect", errorMessage);
-    const timer = setTimeout(() => {
-      setErrorMessage("");
-    }, 3000);
-
-    return () => {
-      clearTimeout(timer);
-    };
-  }, [errorMessage]);
 
   function refreshAllVoting(votingSystem, started, finished) {
     if (!votingSystem) {
@@ -71,17 +65,6 @@ export default function App() {
       setCurrentWinner("");
     }
   }
-
-  useEffect(() => {
-    const refreshOwner = async () => {
-      if (!votingSystem) {
-        return;
-      }
-      const ownerAddress = await votingSystem.owner();
-      setIsOwner(ownerAddress === currentSignerAddress);
-    }
-    refreshOwner();
-  }, [votingSystem, currentSignerAddress]);
 
   useEffect(() => {
     refreshAllVoting(votingSystem, started, finished);
