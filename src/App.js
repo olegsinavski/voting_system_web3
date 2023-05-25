@@ -53,10 +53,6 @@ export default function App() {
     </div>);
   }
 
-  const optionItems = signers.map(s => 
-    <option key={s} value={s}>{s}</option>
-  );
-
   async function handleAddCandidateSubmit(event) {
     event.preventDefault();
     if (!validateAddress(candidateInputValue)) {
@@ -87,16 +83,18 @@ export default function App() {
         <span className={`status-indicator ${voted ? "voted" : "not-voted"}`} id="voting-status">{voted ? " have voted": " haven't voted"}</span>
       </h3>
       <div className="form-container">
-      <form onSubmit={handleAddCandidateSubmit}>
-        <label className="form-label">
-          Add candidate address:
-        </label>
-        <input className="form-input" type="text" list="candidateAddresses" value={candidateInputValue} onChange={handleCandidateInputChange} />
-        <datalist id="candidateAddresses">
-          {optionItems}
-        </datalist>
-        <button className="action-button" type="submit">Add</button>
-      </form>
+        <form onSubmit={handleAddCandidateSubmit}>
+          <label className="form-label">
+            Add candidate address:
+          </label>
+          <input className="form-input" type="text" list="candidateAddresses" value={candidateInputValue} onChange={handleCandidateInputChange} />
+          <datalist id="candidateAddresses">
+            {signers.map(s => 
+              <option key={s} value={s}>{s}</option>
+            )}
+          </datalist>
+          <button className="action-button" type="submit">Add</button>
+        </form>
       </div>
       <CandidatesPanel candidates={candidates} />
     </div>
@@ -138,7 +136,9 @@ export default function App() {
           </label>
           <input className="form-input" type="text" list="candidateAddresses" value={voteInputValue} onChange={handleVoteInputChange} />
           <datalist id="candidateAddresses">
-            {optionItems}
+            {signers.map(s => 
+              <option key={s} value={s}>{s}</option>
+            )}
           </datalist>
           <button className="action-button" type="submit">Vote</button>
         </form>
