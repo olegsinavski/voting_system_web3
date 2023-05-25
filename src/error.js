@@ -15,3 +15,13 @@ export function useDisappearingError(timeout=3000) {
 
     return [errorMessage, setErrorMessage];
 }
+
+export const ErrorPopup = ({ errorMessage }) => {
+  return (
+    errorMessage && (
+      <div className="error-popup">
+        <p>{errorMessage}</p>
+      </div>
+    )
+  );
+};

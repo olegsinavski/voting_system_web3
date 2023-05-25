@@ -7,7 +7,9 @@ import { useState, useEffect } from 'react';
 import { useEthersProvider, ProviderSelection } from './ethersProvider';
 import { useContract, useIsOwner } from './contract';
 import { useSigners, IdentityPanel } from './signers';
-import { useDisappearingError } from './error';
+import { useDisappearingError, ErrorPopup } from './error';
+import DeployContractButton from "./deployButton";
+import StartStopVotingButton from "./startVotingButton";
 import contractABI from './artifacts/contracts/VotingSystem.sol/VotingSystem.json';
 
 import { fetchCandidates, fetchCurrentWinner, CandidatesPanel, WinnerPanel} from './candidates';
@@ -47,10 +49,8 @@ export default function App() {
   const [voted, setVoted] = useState(false);
   const isOwner = useIsOwner(votingSystem, currentSignerAddress);
 
-
   const [candidates, setCandidates] = useState([]);
   const [currentWinner, setCurrentWinner] = useState("");
-
 
   function refreshAllVoting(votingSystem, started, finished) {
     if (!votingSystem) {
@@ -77,33 +77,11 @@ export default function App() {
     <option key={s} value={s}>{s}</option>
   );
 
-  async function onDeployNewContract() {
-    const signer = provider.getSigner(currentSignerAddress);
-    const VotingFactory = new ethers.ContractFactory(contractABI.abi, contractABI.bytecode, signer);
-    try {
-      setLoading(true);
-      const contractInstance = await VotingFactory.deploy();
-      await contractInstance.deployed();
-      setContractAddress(contractInstance.address);
-    } catch (error) {
-      setErrorMessage(txErrorToHumanReadable(error));
-    } 
-    setLoading(false);
-  }
-
-  const deployButton = (
-    <div> <button className="action-button" onClick={onDeployNewContract}
-    title="Deploy a fresh contract as a current user who is going to be its admin">
-    Deploy new voting system
-   </button> 
-  </div>
-  );
 
   if (!votingSystem) {
     return (
     <div>
-    {loading && <Spinner/>}
-    
+    <Spinner loading={loading}/>
     <div className="narrower-column">
       <div className="narrower-column-internal">
         <h2>Administrator panel</h2>
@@ -117,29 +95,18 @@ export default function App() {
           currentSignerAddress={currentSignerAddress}
           setCurrentSignerAddress={setCurrentSignerAddress}
         />
-        {deployButton}
-        {errorMessage && (
-          <div className="error-popup">
-            <p>{errorMessage}</p>
-          </div>
-        )}
+        <DeployContractButton
+          provider={provider}
+          currentSignerAddress={currentSignerAddress}
+          contractABI={contractABI}
+          setContractAddress={setContractAddress}
+          setLoading={setLoading}
+          setErrorMessage={setErrorMessage}
+        />
+        <ErrorPopup errorMessage={errorMessage} />
       </div>
     </div>
     </div>);
-  }
-
-  async function onToggleVoting() {
-    try {
-      setLoading(true);
-      const tx = started ? await votingSystem.finishVoting() : await votingSystem.startVoting();
-      const response = await tx.wait();
-      console.log('Transaction response:', response);
-    } catch (error) {
-      console.log(error)
-      setErrorMessage(txErrorToHumanReadable(error));
-    } 
-    setLoading(false);
-    refreshStartedFinished(votingSystem);
   }
 
   async function handleAddCandidateSubmit(event) {
@@ -203,19 +170,24 @@ export default function App() {
           currentSignerAddress={currentSignerAddress}
           setCurrentSignerAddress={setCurrentSignerAddress}
         />
-        {isOwner && !finished && (<div style={{ display: 'flex', justifyContent: 'flex-start', alignItems: 'center' }}> 
-          <button className="action-button" onClick={onToggleVoting}>
-            {started ? "Finish": "Start"} voting!
-          </button>
-          <h4 style={{ margin: '10px'}}>You are the admin  </h4> 
-          </div>)} 
-        {!isOwner && (<p>You are a regular user</p>)}
-        {deployButton}
-        {errorMessage && (
-          <div className="error-popup">
-            <p>{errorMessage}</p>
-          </div>
-        )}
+        <StartStopVotingButton
+          isOwner={isOwner}
+          started={started}
+          finished={finished}
+          votingSystem={votingSystem}
+          refreshStartedFinished={refreshStartedFinished}
+          setLoading={setLoading}
+          setErrorMessage={setErrorMessage}
+        />
+        <DeployContractButton
+          provider={provider}
+          currentSignerAddress={currentSignerAddress}
+          contractABI={contractABI}
+          setLoading={setLoading}
+          setContractAddress={setContractAddress}
+          setErrorMessage={setErrorMessage}
+        />
+        <ErrorPopup errorMessage={errorMessage} />
       </div>
     </div>
   );
@@ -276,7 +248,7 @@ export default function App() {
 
   return (
     <div className="container">
-      {loading && <Spinner/>}
+      <Spinner loading={loading}/>
       {started ? startedPanel: (finished ? finishedPanel : notStartedPanel)}
       {adminPanel}
     </div>
