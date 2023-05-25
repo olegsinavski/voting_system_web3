@@ -86,13 +86,13 @@ export default function App() {
           setUseMetaMask={setUseMetaMask}
           networkName={networkName}
         />
-        <p>Contract {contractAddress}</p>
+        {contractAddress && <p>Contract {contractAddress}</p>}
         <IdentityPanel
           signers={signers}
           currentSignerAddress={currentSignerAddress}
           setCurrentSignerAddress={setCurrentSignerAddress}
         />
-        <StartStopVotingButton
+        {votingSystem && <StartStopVotingButton
           isOwner={isOwner}
           started={started}
           finished={finished}
@@ -100,7 +100,7 @@ export default function App() {
           refreshStartedFinished={refreshStartedFinished}
           setLoading={setLoading}
           setErrorMessage={setErrorMessage}
-        />
+        />}
         <DeployContractButton
           provider={provider}
           currentSignerAddress={currentSignerAddress}
@@ -117,31 +117,8 @@ export default function App() {
   if (!votingSystem) {
     return (
     <div>
-    <Spinner loading={loading}/>
-    <div className="narrower-column">
-      <div className="narrower-column-internal">
-        <h2>Administrator panel</h2>
-        <ProviderSelection
-          useMetaMask={useMetaMask}
-          setUseMetaMask={setUseMetaMask}
-          networkName={networkName}
-        />
-        <IdentityPanel
-          signers={signers}
-          currentSignerAddress={currentSignerAddress}
-          setCurrentSignerAddress={setCurrentSignerAddress}
-        />
-        <DeployContractButton
-          provider={provider}
-          currentSignerAddress={currentSignerAddress}
-          contractABI={contractABI}
-          setContractAddress={setContractAddress}
-          setLoading={setLoading}
-          setErrorMessage={setErrorMessage}
-        />
-        <ErrorPopup errorMessage={errorMessage} />
-      </div>
-    </div>
+      <Spinner loading={loading}/>
+      {adminPanel}
     </div>);
   }
 
