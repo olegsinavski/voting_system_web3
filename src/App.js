@@ -1,15 +1,13 @@
 // import logo from './logo.svg';
 import './App.css';
 
-import { ethers } from 'ethers';
 import { validateAddress, txErrorToHumanReadable } from './utils';
 import { useState, useEffect } from 'react';
 import { useEthersProvider, ProviderSelection } from './ethersProvider';
 import { useContract, useIsOwner } from './contract';
-import { useSigners, IdentityPanel } from './signers';
-import { useDisappearingError, ErrorPopup } from './error';
-import DeployContractButton from "./deployButton";
-import StartStopVotingButton from "./startVotingButton";
+import { useSigners } from './signers';
+import { useDisappearingError } from './error';
+import AdminPanel from "./adminPanel"
 import contractABI from './artifacts/contracts/VotingSystem.sol/VotingSystem.json';
 
 import { fetchCandidates, fetchCurrentWinner, CandidatesPanel, WinnerPanel} from './candidates';
@@ -18,8 +16,8 @@ import Spinner from './spinner';
 
 export default function App() {
   const [errorMessage, setErrorMessage] = useDisappearingError();
-
   const [loading, setLoading] = useState(false);
+
   const [useMetaMask, setUseMetaMask] = useState(false);
   const [provider, networkName] = useEthersProvider('http://127.0.0.1:8545', useMetaMask, setErrorMessage);
   const [contractAddress, setContractAddress] = useState("");
@@ -44,7 +42,6 @@ export default function App() {
   useEffect(() => {
     refreshStartedFinished(votingSystem);
   }, [votingSystem]);
-
 
   const [voted, setVoted] = useState(false);
   const isOwner = useIsOwner(votingSystem, currentSignerAddress);
@@ -73,54 +70,38 @@ export default function App() {
   const [candidateInputValue, setCandidateInputValue] = useState('');
   const [voteInputValue, setVoteInputValue] = useState('');
 
-  const optionItems = signers.map(s => 
-    <option key={s} value={s}>{s}</option>
-  );
 
-  const adminPanel = (
-    <div className="narrower-column">
-      <div className="narrower-column-internal">
-        <h2>Administrator panel</h2>
-        <ProviderSelection
-          useMetaMask={useMetaMask}
-          setUseMetaMask={setUseMetaMask}
-          networkName={networkName}
-        />
-        {contractAddress && <p>Contract {contractAddress}</p>}
-        <IdentityPanel
-          signers={signers}
-          currentSignerAddress={currentSignerAddress}
-          setCurrentSignerAddress={setCurrentSignerAddress}
-        />
-        {votingSystem && <StartStopVotingButton
-          isOwner={isOwner}
-          started={started}
-          finished={finished}
-          votingSystem={votingSystem}
-          refreshStartedFinished={refreshStartedFinished}
-          setLoading={setLoading}
-          setErrorMessage={setErrorMessage}
-        />}
-        <DeployContractButton
-          provider={provider}
-          currentSignerAddress={currentSignerAddress}
-          contractABI={contractABI}
-          setLoading={setLoading}
-          setContractAddress={setContractAddress}
-          setErrorMessage={setErrorMessage}
-        />
-        <ErrorPopup errorMessage={errorMessage} />
-      </div>
-    </div>
-  );
 
   if (!votingSystem) {
     return (
     <div>
       <Spinner loading={loading}/>
-      {adminPanel}
+      <AdminPanel
+        useMetaMask={useMetaMask}
+        setUseMetaMask={setUseMetaMask}
+        networkName={networkName}
+        contractAddress={contractAddress}
+        signers={signers}
+        currentSignerAddress={currentSignerAddress}
+        setCurrentSignerAddress={setCurrentSignerAddress}
+        isOwner={isOwner}
+        started={started}
+        finished={finished}
+        votingSystem={votingSystem}
+        refreshStartedFinished={refreshStartedFinished}
+        setLoading={setLoading}
+        setErrorMessage={setErrorMessage}
+        provider={provider}
+        contractABI={contractABI}
+        setContractAddress={setContractAddress}
+        errorMessage={errorMessage}
+      />
     </div>);
   }
+
+  const optionItems = signers.map(s => 
+    <option key={s} value={s}>{s}</option>
+  );
 
   async function handleAddCandidateSubmit(event) {
     event.preventDefault();
@@ -147,7 +128,9 @@ export default function App() {
 
   const notStartedPanel = (
     <div className="wider-column">
-      <h3 className="centered">Voting has hasn't started
+      <h3 id="voting-header" className={started ? (finished ? "finished" : "") : "not-started"}>
+        Voting has <span className={started ? (finished ? "finished" : "") : "not-started"}>{started ? "started": "not started"}</span>, you 
+        <span className={`status-indicator ${voted ? "voted" : "not-voted"}`} id="voting-status">{voted ? " have voted": " haven't voted"}</span>
       </h3>
       <div className="form-container">
       <form onSubmit={handleAddCandidateSubmit}>
@@ -226,7 +209,26 @@ export default function App() {
     <div className="container">
       <Spinner loading={loading}/>
       {started ? startedPanel: (finished ? finishedPanel : notStartedPanel)}
-      {adminPanel}
+      <AdminPanel
+        useMetaMask={useMetaMask}
+        setUseMetaMask={setUseMetaMask}
+        networkName={networkName}
+        contractAddress={contractAddress}
+        signers={signers}
+        currentSignerAddress={currentSignerAddress}
+        setCurrentSignerAddress={setCurrentSignerAddress}
+        isOwner={isOwner}
+        started={started}
+        finished={finished}
+        votingSystem={votingSystem}
+        refreshStartedFinished={refreshStartedFinished}
+        setLoading={setLoading}
+        setErrorMessage={setErrorMessage}
+        provider={provider}
+        contractABI={contractABI}
+        setContractAddress={setContractAddress}
+        errorMessage={errorMessage}
+      />
     </div>
   );
 
