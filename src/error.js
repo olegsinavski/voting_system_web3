@@ -11,7 +11,7 @@ export function useDisappearingError(timeout=3000) {
       return () => {
         clearTimeout(timer);
       };
-    }, [errorMessage]);
+    }, [errorMessage, timeout]);
 
     return [errorMessage, setErrorMessage];
 }

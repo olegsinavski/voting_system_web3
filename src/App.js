@@ -3,12 +3,9 @@ import './App.css';
 
 import { validateAddress, txErrorToHumanReadable } from './utils';
 import { useState, useEffect } from 'react';
-import { useEthersProvider, ProviderSelection } from './ethersProvider';
-import { useContract, useIsOwner } from './contract';
-import { useSigners } from './signers';
 import { useDisappearingError } from './error';
-import AdminPanel from "./adminPanel"
-import contractABI from './artifacts/contracts/VotingSystem.sol/VotingSystem.json';
+import useAdminPanel from "./adminPanel"
+
 
 import { fetchCandidates, fetchCurrentWinner, CandidatesPanel, WinnerPanel} from './candidates';
 import Spinner from './spinner';
@@ -18,33 +15,10 @@ export default function App() {
   const [errorMessage, setErrorMessage] = useDisappearingError();
   const [loading, setLoading] = useState(false);
 
-  const [useMetaMask, setUseMetaMask] = useState(false);
-  const [provider, networkName] = useEthersProvider('http://127.0.0.1:8545', useMetaMask, setErrorMessage);
-  const [contractAddress, setContractAddress] = useState("");
-
-  const {signers, currentSignerAddress, setCurrentSignerAddress}  = useSigners(provider);
-
-  const votingSystem = useContract(provider, currentSignerAddress, contractAddress, contractABI.abi);
-
-  const [started, setStarted] = useState(false);
-  const [finished, setFinished] = useState(false);
-
-  async function refreshStartedFinished(votingSystem) {
-    if (!votingSystem) {
-      return;
-    }
-    const startedValue = await votingSystem.started();
-    const finishedValue = await votingSystem.finished();
-    setStarted(startedValue);
-    setFinished(finishedValue);
-  };
-  
-  useEffect(() => {
-    refreshStartedFinished(votingSystem);
-  }, [votingSystem]);
+  const [votingSystem, started, finished, signers, adminPanel] = useAdminPanel(
+    errorMessage, setLoading, setErrorMessage);
 
   const [voted, setVoted] = useState(false);
-  const isOwner = useIsOwner(votingSystem, currentSignerAddress);
 
   const [candidates, setCandidates] = useState([]);
   const [currentWinner, setCurrentWinner] = useState("");
@@ -69,33 +43,13 @@ export default function App() {
 
   const [candidateInputValue, setCandidateInputValue] = useState('');
   const [voteInputValue, setVoteInputValue] = useState('');
-
-
+  
 
   if (!votingSystem) {
     return (
     <div>
       <Spinner loading={loading}/>
-      <AdminPanel
-        useMetaMask={useMetaMask}
-        setUseMetaMask={setUseMetaMask}
-        networkName={networkName}
-        contractAddress={contractAddress}
-        signers={signers}
-        currentSignerAddress={currentSignerAddress}
-        setCurrentSignerAddress={setCurrentSignerAddress}
-        isOwner={isOwner}
-        started={started}
-        finished={finished}
-        votingSystem={votingSystem}
-        refreshStartedFinished={refreshStartedFinished}
-        setLoading={setLoading}
-        setErrorMessage={setErrorMessage}
-        provider={provider}
-        contractABI={contractABI}
-        setContractAddress={setContractAddress}
-        errorMessage={errorMessage}
-      />
+      {adminPanel}
     </div>);
   }
 
@@ -209,26 +163,7 @@ export default function App() {
     <div className="container">
       <Spinner loading={loading}/>
       {started ? startedPanel: (finished ? finishedPanel : notStartedPanel)}
-      <AdminPanel
-        useMetaMask={useMetaMask}
-        setUseMetaMask={setUseMetaMask}
-        networkName={networkName}
-        contractAddress={contractAddress}
-        signers={signers}
-        currentSignerAddress={currentSignerAddress}
-        setCurrentSignerAddress={setCurrentSignerAddress}
-        isOwner={isOwner}
-        started={started}
-        finished={finished}
-        votingSystem={votingSystem}
-        refreshStartedFinished={refreshStartedFinished}
-        setLoading={setLoading}
-        setErrorMessage={setErrorMessage}
-        provider={provider}
-        contractABI={contractABI}
-        setContractAddress={setContractAddress}
-        errorMessage={errorMessage}
-      />
+      {adminPanel}
     </div>
   );
 

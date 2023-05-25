@@ -1,34 +1,45 @@
-
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import contractABI from './artifacts/contracts/VotingSystem.sol/VotingSystem.json';
+import { useEthersProvider } from './ethersProvider';
 import DeployContractButton from "./deployButton";
 import StartStopVotingButton from "./startVotingButton";
 import { IdentityPanel } from './signers';
 import { ProviderSelection } from './ethersProvider';
 import { ErrorPopup } from './error';
+import { useIsOwner, useContract } from './contract';
+import { useSigners } from './signers';
 
-const AdminPanel = ({
-  useMetaMask,
-  setUseMetaMask,
-  networkName,
-  contractAddress,
-  signers,
-  currentSignerAddress,
-  setCurrentSignerAddress,
-  isOwner,
-  started,
-  finished,
-  votingSystem,
-  refreshStartedFinished,
+const useAdminPanel = (
+  errorMessage,
   setLoading,
   setErrorMessage,
-  provider,
-  contractABI,
-  setContractAddress,
-  errorMessage,
-}) => {
+) => {
+    
+  const [contractAddress, setContractAddress] = useState("");  
+  const [started, setStarted] = useState(false);
+  const [finished, setFinished] = useState(false);
+  const [useMetaMask, setUseMetaMask] = useState(false);
+  const [provider, networkName] = useEthersProvider('http://127.0.0.1:8545', useMetaMask, setErrorMessage);
+  
+  const {signers, currentSignerAddress, setCurrentSignerAddress}  = useSigners(provider);
+  const votingSystem = useContract(provider, currentSignerAddress, contractAddress, contractABI.abi);
+  const isOwner = useIsOwner(votingSystem, currentSignerAddress);
 
+  async function refreshStartedFinished(votingSystem) {
+    if (!votingSystem) {
+      return;
+    }
+    const startedValue = await votingSystem.started();
+    const finishedValue = await votingSystem.finished();
+    setStarted(startedValue);
+    setFinished(finishedValue);
+  }
 
-  return (
+  useEffect(() => {
+    refreshStartedFinished(votingSystem);
+  }, [votingSystem]);
+
+  const adminPanel = (
     <div className="narrower-column">
       <div className="narrower-column-internal">
         <h2>Administrator panel</h2>
@@ -66,6 +77,7 @@ const AdminPanel = ({
       </div>
     </div>
   );
+  return [votingSystem, started, finished, signers, adminPanel];
 };
 
-export default AdminPanel;
+export default useAdminPanel;
