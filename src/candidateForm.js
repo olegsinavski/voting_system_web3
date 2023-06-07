@@ -10,6 +10,10 @@ export function CandidateForm({
 }) {
   const [candidateInputValue, setCandidateInputValue] = useState('');
 
+  const handleCandidateInputChange = (event) => {
+      setCandidateInputValue(event.target.value);
+  };
+
   async function handleAddCandidateSubmit(event) {
       event.preventDefault();
       if (!validateAddress(candidateInputValue)) {
@@ -25,7 +29,7 @@ export function CandidateForm({
               <label className="form-label">
               {label}
               </label>
-              <input className="form-input" type="text" list="candidateAddresses" value={candidateInputValue} onChange={setCandidateInputValue} />
+              <input className="form-input" type="text" list="candidateAddresses" value={candidateInputValue} onChange={handleCandidateInputChange} />
               <datalist id="candidateAddresses">
                 {signers.map(s => 
                     <option key={s} value={s}>{s}</option>

@@ -62,7 +62,7 @@ export default function App() {
                   setErrorMessage={setErrorMessage}
                   onAsyncUpdate={started ? onVote : onAddCandidate}
                 />
-                {started ? <WinnerPanel currentWinner={currentWinner} finished={false} /> : ""}
+                {(started && currentWinner.length) ? <WinnerPanel currentWinner={currentWinner} finished={false} /> : ""}
               </div>
             }
             <CandidatesPanel candidates={candidates} />
