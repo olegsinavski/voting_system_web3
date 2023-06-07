@@ -3,7 +3,7 @@ import './App.css';
 import { useState, useEffect } from 'react';
 import { useDisappearingError } from './error';
 import useAdminPanel from "./adminPanel";
-import { useNotStartedPanel, useStartedPanel, useFinishedPanel } from "./startedPanel"
+import { NotStartedPanel, StartedPanel, FinishedPanel } from "./startedPanel"
 import Spinner from './spinner';
 import VotingHeader from './votingHeader';
 import { fetchCandidates, fetchCurrentWinner} from './candidates';
@@ -32,45 +32,43 @@ export default function App() {
   useEffect(() => {
       refreshAllVoting(votingSystem);
   }, [votingSystem]);
-
-  const notStartedPanel = useNotStartedPanel(
-    votingSystem,
-    signers,
-    candidates,
-    setCandidates,
-    setLoading,
-    setErrorMessage,
-  );
-
-  const startedPanel = useStartedPanel(
-    votingSystem,
-    signers,
-    candidates,
-    currentWinner,
-    refreshAllVoting,
-    setLoading,
-    setErrorMessage
-  );
   
-  const finishedPanel = useFinishedPanel(candidates, currentWinner);
-
-  if (!votingSystem) {
+  if (votingSystem) {
+    return (
+      <div className="container">
+        <Spinner loading={loading}/>
+        <div className="wider-column">
+            <VotingHeader started={started} finished={finished} voted={voted} />
+            {started ? 
+              <StartedPanel
+                votingSystem={votingSystem}
+                signers={signers}
+                candidates={candidates}
+                currentWinner={currentWinner}
+                refreshAllVoting={refreshAllVoting}
+                setLoading={setLoading}
+                setErrorMessage={setErrorMessage}
+              /> : (finished ? 
+              <FinishedPanel candidates={candidates} currentWinner={currentWinner}/> : 
+              <NotStartedPanel
+                votingSystem={votingSystem}
+                signers={signers}
+                candidates={candidates}
+                setCandidates={setCandidates}
+                setLoading={setLoading}
+                setErrorMessage={setErrorMessage}
+              />
+            )}
+        </div>
+        {adminPanel}
+      </div>
+    );
+  } else {
     return (
     <div>
       <Spinner loading={loading}/>
       {adminPanel}
     </div>);
   }
-
-  return (
-    <div className="container">
-      <Spinner loading={loading}/>
-      <div className="wider-column">
-          <VotingHeader started={started} finished={finished} voted={voted} />
-          {started ? startedPanel: (finished ? finishedPanel : notStartedPanel)}
-      </div>
-      {adminPanel}
-    </div>
-  );
 
 };

@@ -3,14 +3,14 @@ import { useState } from 'react';
 
 import { fetchCandidates, CandidatesPanel, WinnerPanel} from './candidates';
 
-export function useNotStartedPanel(
+export function NotStartedPanel({
     votingSystem,
     signers,
     candidates,
     setCandidates,
     setLoading,
     setErrorMessage
-  ) {
+}) {
     const [candidateInputValue, setCandidateInputValue] = useState('');
 
     async function handleAddCandidateSubmit(event) {
@@ -51,7 +51,7 @@ export function useNotStartedPanel(
   }
 
 
-  export function useStartedPanel(
+  export function StartedPanel({
     votingSystem,
     signers,
     candidates,
@@ -59,7 +59,7 @@ export function useNotStartedPanel(
     refreshAllVoting,
     setLoading,
     setErrorMessage
-  ) {
+  }) {
 
     const [voteInputValue, setVoteInputValue] = useState('');
 
@@ -102,10 +102,10 @@ export function useNotStartedPanel(
 }
 
 
-export function useFinishedPanel(
+export function FinishedPanel({
     candidates,
     currentWinner
-  ) {
+}) {
 
     const finishedPanel = (
         <div>
