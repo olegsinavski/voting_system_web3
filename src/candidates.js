@@ -1,5 +1,3 @@
-import { useState, useEffect } from 'react';
-
 export async function fetchCandidates(votingSystem) {
     if (!votingSystem) {
         return [];

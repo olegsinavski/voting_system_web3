@@ -1,13 +1,10 @@
 import { validateAddress, makeTransaction } from './utils';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 
-import { fetchCandidates, fetchCurrentWinner, CandidatesPanel, WinnerPanel} from './candidates';
+import { fetchCandidates, CandidatesPanel, WinnerPanel} from './candidates';
 
 export function useNotStartedPanel(
     votingSystem,
-    started,
-    finished,
-    voted,
     signers,
     candidates,
     setCandidates,
@@ -31,11 +28,7 @@ export function useNotStartedPanel(
     };
 
     const notStartedPanel = (
-        <div className="wider-column">
-            <h3 id="voting-header" className={started ? (finished ? "finished" : "") : "not-started"}>
-            Voting has <span className={started ? (finished ? "finished" : "") : "not-started"}>{started ? "started": "not started"}</span>, you 
-            <span className={`status-indicator ${voted ? "voted" : "not-voted"}`} id="voting-status">{voted ? " have voted": " haven't voted"}</span>
-            </h3>
+        <div>
             <div className="form-container">
             <form onSubmit={handleAddCandidateSubmit}>
                 <label className="form-label">
@@ -60,37 +53,15 @@ export function useNotStartedPanel(
 
   export function useStartedPanel(
     votingSystem,
-    started,
-    finished,
-    voted,
-    setVoted,
     signers,
     candidates,
-    setCandidates,
     currentWinner,
-    setCurrentWinner,
+    refreshAllVoting,
     setLoading,
     setErrorMessage
   ) {
 
     const [voteInputValue, setVoteInputValue] = useState('');
-
-    function refreshAllVoting(votingSystem, started, finished) {
-        if (!votingSystem) {
-            return;
-        }
-        votingSystem.voted().then(setVoted);
-        fetchCandidates(votingSystem).then(setCandidates);
-        if (started || finished) {
-            fetchCurrentWinner(votingSystem).then(setCurrentWinner);
-        } else {
-            setCurrentWinner("");
-        }
-    }
-
-    useEffect(() => {
-        refreshAllVoting(votingSystem, started, finished);
-    }, [votingSystem, started, finished]);
 
     async function handleVoteSubmit(event) {
         event.preventDefault();
@@ -99,7 +70,7 @@ export function useNotStartedPanel(
             return;
         }
         await makeTransaction(() => votingSystem.vote(voteInputValue), setLoading, setErrorMessage);
-        refreshAllVoting(votingSystem, started, finished)
+        refreshAllVoting(votingSystem)
     };
     
     const handleVoteInputChange = (event) => {
@@ -107,11 +78,7 @@ export function useNotStartedPanel(
     };
 
     const startedPanel = (
-        <div className="wider-column">
-          <h3 id="voting-header" className={started ? (finished ? "finished" : "") : "not-started"}>
-            Voting has <span className={started ? (finished ? "finished" : "") : "not-started"}>{started ? "started": "not started"}</span>, you 
-            <span className={`status-indicator ${voted ? "voted" : "not-voted"}`} id="voting-status">{voted ? " have voted": " haven't voted"}</span>
-          </h3>
+        <div>
           <div className="form-container">
             <form onSubmit={handleVoteSubmit}>
               <label className="form-label">
@@ -126,35 +93,26 @@ export function useNotStartedPanel(
               <button className="action-button" type="submit">Vote</button>
             </form>
           </div>
-          <WinnerPanel currentWinner={currentWinner} finished={finished} />
+          <WinnerPanel currentWinner={currentWinner} finished={false} />
           <CandidatesPanel candidates={candidates} />
         </div>
       );
 
     return startedPanel;
-
 }
 
 
 export function useFinishedPanel(
-    started,
-    finished,
-    voted,
     candidates,
     currentWinner
   ) {
 
     const finishedPanel = (
-        <div className="wider-column">
-          <h3 id="voting-header" className={started ? (finished ? "finished" : "") : "not-started"}>
-            Voting has finished, you 
-            <span className={`status-indicator ${voted ? "voted" : "not-voted"}`} id="voting-status">{voted ? " have voted": " haven't voted"}</span>
-          </h3>
-          <WinnerPanel currentWinner={currentWinner} finished={finished} />
+        <div>
+          <WinnerPanel currentWinner={currentWinner} finished={true} />
           <CandidatesPanel candidates={candidates} />
         </div>
     );
 
     return finishedPanel;
-
 }
