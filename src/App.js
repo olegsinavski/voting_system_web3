@@ -3,7 +3,7 @@ import './App.css';
 import { useState, useEffect } from 'react';
 import { useDisappearingError } from './error';
 import useAdminPanel from "./adminPanel";
-import { NotStartedPanel, StartedPanel, FinishedPanel } from "./startedPanel"
+import { NotStartedPanel, StartedPanel, FinishedPanel } from "./contentPanels"
 import Spinner from './spinner';
 import VotingHeader from './votingHeader';
 import { fetchCandidates, fetchCurrentWinner} from './candidates';
