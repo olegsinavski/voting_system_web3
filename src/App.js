@@ -3,10 +3,11 @@ import './App.css';
 import { useState, useEffect } from 'react';
 import { useDisappearingError } from './error';
 import useAdminPanel from "./adminPanel";
-import { NotStartedPanel, StartedPanel, FinishedPanel } from "./contentPanels"
+import { CandidateForm } from "./candidateForm"
+import { makeTransaction } from './utils';
 import Spinner from './spinner';
 import VotingHeader from './votingHeader';
-import { fetchCandidates, fetchCurrentWinner} from './candidates';
+import { fetchCandidates, fetchCurrentWinner, CandidatesPanel, WinnerPanel} from './candidates';
 
 
 export default function App() {
@@ -32,33 +33,39 @@ export default function App() {
   useEffect(() => {
       refreshAllVoting(votingSystem);
   }, [votingSystem]);
-  
+
+
+  async function onAddCandidate(address) {
+      await makeTransaction(() => votingSystem.addCandidate(address), setLoading, setErrorMessage);
+      fetchCandidates(votingSystem).then(setCandidates)
+  };
+
+  async function onVote(address) {
+      await makeTransaction(() => votingSystem.vote(address), setLoading, setErrorMessage);
+      refreshAllVoting(votingSystem)
+  };
+
+
   if (votingSystem) {
     return (
       <div className="container">
         <Spinner loading={loading}/>
         <div className="wider-column">
             <VotingHeader started={started} finished={finished} voted={voted} />
-            {started ? 
-              <StartedPanel
-                votingSystem={votingSystem}
-                signers={signers}
-                candidates={candidates}
-                currentWinner={currentWinner}
-                refreshAllVoting={refreshAllVoting}
-                setLoading={setLoading}
-                setErrorMessage={setErrorMessage}
-              /> : (finished ? 
-              <FinishedPanel candidates={candidates} currentWinner={currentWinner}/> : 
-              <NotStartedPanel
-                votingSystem={votingSystem}
-                signers={signers}
-                candidates={candidates}
-                setCandidates={setCandidates}
-                setLoading={setLoading}
-                setErrorMessage={setErrorMessage}
-              />
-            )}
+            {finished ? 
+              <WinnerPanel currentWinner={currentWinner} finished={true} /> :
+              <div>
+                <CandidateForm 
+                  label={started ? "Vote for (candidate address):" : "Add candidate address:"}
+                  buttonLabel={started ? "Vote": "Add" }
+                  signers={signers}
+                  setErrorMessage={setErrorMessage}
+                  onAsyncUpdate={started ? onVote : onAddCandidate}
+                />
+                {started ? <WinnerPanel currentWinner={currentWinner} finished={false} /> : ""}
+              </div>
+            }
+            <CandidatesPanel candidates={candidates} />
         </div>
         {adminPanel}
       </div>
