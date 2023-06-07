@@ -19,7 +19,12 @@ export async function fetchCurrentWinner(votingSystem) {
     if (!votingSystem) {
         return [];
     }
-    return await votingSystem.currentWinner();
+    try {
+      return await votingSystem.currentWinner();
+    } catch (error) {
+      return [];
+    }
+    
 };
   
 

@@ -7,7 +7,6 @@ export function useEthersProvider(endpoint, useMetaMask, setErrorMessage) {
   
   useEffect(() => {
     const fetchProvider = async () => {
-      console.log("Connecting...");
       if (useMetaMask) {
         if (!window.ethereum) {
           setProvider(null);
@@ -37,7 +36,6 @@ export function useEthersProvider(endpoint, useMetaMask, setErrorMessage) {
         });
         
         try {
-          console.log('timeout')
           await Promise.race([newProvider.ready, timeoutPromise]);
           setProvider(newProvider);
         } catch (error) {
@@ -53,7 +51,6 @@ export function useEthersProvider(endpoint, useMetaMask, setErrorMessage) {
     fetchProvider();
     return () => {
       if (provider) {
-        console.log("Disconnecting");
         provider.removeAllListeners();
         // provider.connection.close();
       }

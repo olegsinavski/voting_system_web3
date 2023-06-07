@@ -9,11 +9,11 @@ import { ErrorPopup } from './error';
 import { useIsOwner, useContract } from './contract';
 import { useSigners } from './signers';
 
-const useAdminPanel = (
+export default function useAdminPanel(
   errorMessage,
   setLoading,
   setErrorMessage,
-) => {
+) {
     
   const [contractAddress, setContractAddress] = useState("");  
   const [started, setStarted] = useState(false);
@@ -79,5 +79,3 @@ const useAdminPanel = (
   );
   return [votingSystem, started, finished, signers, adminPanel];
 };
-
-export default useAdminPanel;

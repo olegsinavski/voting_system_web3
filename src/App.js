@@ -1,13 +1,10 @@
 // import logo from './logo.svg';
 import './App.css';
 
-import { validateAddress, txErrorToHumanReadable, makeTransaction } from './utils';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useDisappearingError } from './error';
-import useAdminPanel from "./adminPanel"
-
-
-import { fetchCandidates, fetchCurrentWinner, CandidatesPanel, WinnerPanel} from './candidates';
+import useAdminPanel from "./adminPanel";
+import { useNotStartedPanel, useStartedPanel, useFinishedPanel } from "./startedPanel"
 import Spinner from './spinner';
 
 
@@ -23,27 +20,40 @@ export default function App() {
   const [candidates, setCandidates] = useState([]);
   const [currentWinner, setCurrentWinner] = useState("");
 
-  function refreshAllVoting(votingSystem, started, finished) {
-    if (!votingSystem) {
-      return;
-    }
-    votingSystem.voted().then(setVoted);
-    fetchCandidates(votingSystem).then(setCandidates);
-    if (started || finished) {
-      console.log("fetching winner", started, finished);
-      fetchCurrentWinner(votingSystem).then(setCurrentWinner);
-    } else {
-      setCurrentWinner("");
-    }
-  }
+  const notStartedPanel = useNotStartedPanel(
+    votingSystem,
+    started,
+    finished,
+    voted,
+    signers,
+    candidates,
+    setCandidates,
+    setLoading,
+    setErrorMessage,
+  );
 
-  useEffect(() => {
-    refreshAllVoting(votingSystem, started, finished);
-  }, [votingSystem, started, finished]);
-
-  const [candidateInputValue, setCandidateInputValue] = useState('');
-  const [voteInputValue, setVoteInputValue] = useState('');
+  const startedPanel = useStartedPanel(
+    votingSystem,
+    started,
+    finished,
+    voted,
+    setVoted,
+    signers,
+    candidates,
+    setCandidates,
+    currentWinner,
+    setCurrentWinner,
+    setLoading,
+    setErrorMessage
+  );
   
+  const finishedPanel = useFinishedPanel(
+    started,
+    finished,
+    voted,
+    candidates,
+    currentWinner
+  );
 
   if (!votingSystem) {
     return (
@@ -52,94 +62,6 @@ export default function App() {
       {adminPanel}
     </div>);
   }
-
-  async function handleAddCandidateSubmit(event) {
-    event.preventDefault();
-    if (!validateAddress(candidateInputValue)) {
-      setErrorMessage('Invalid candidate address - should be full address');
-      return;
-    }
-    await makeTransaction(() => votingSystem.addCandidate(candidateInputValue), setLoading, setErrorMessage);
-    fetchCandidates(votingSystem).then(setCandidates)
-  };
-
-  const handleCandidateInputChange = (event) => {
-      setCandidateInputValue(event.target.value);
-  };
-
-  const notStartedPanel = (
-    <div className="wider-column">
-      <h3 id="voting-header" className={started ? (finished ? "finished" : "") : "not-started"}>
-        Voting has <span className={started ? (finished ? "finished" : "") : "not-started"}>{started ? "started": "not started"}</span>, you 
-        <span className={`status-indicator ${voted ? "voted" : "not-voted"}`} id="voting-status">{voted ? " have voted": " haven't voted"}</span>
-      </h3>
-      <div className="form-container">
-        <form onSubmit={handleAddCandidateSubmit}>
-          <label className="form-label">
-            Add candidate address:
-          </label>
-          <input className="form-input" type="text" list="candidateAddresses" value={candidateInputValue} onChange={handleCandidateInputChange} />
-          <datalist id="candidateAddresses">
-            {signers.map(s => 
-              <option key={s} value={s}>{s}</option>
-            )}
-          </datalist>
-          <button className="action-button" type="submit">Add</button>
-        </form>
-      </div>
-      <CandidatesPanel candidates={candidates} />
-    </div>
-  );
-
-  async function handleVoteSubmit(event) {
-    event.preventDefault();
-    if (!validateAddress(voteInputValue)) {
-      setErrorMessage('Invalid vote address - should be full address');
-      return;
-    }
-    await makeTransaction(() => votingSystem.vote(voteInputValue), setLoading, setErrorMessage);
-    refreshAllVoting(votingSystem, started, finished)
-  };
-
-  const handleVoteInputChange = (event) => {
-    setVoteInputValue(event.target.value);
-  };
-
-  const startedPanel = (
-    <div className="wider-column">
-      <h3 id="voting-header" className={started ? (finished ? "finished" : "") : "not-started"}>
-        Voting has <span className={started ? (finished ? "finished" : "") : "not-started"}>{started ? "started": "not started"}</span>, you 
-        <span className={`status-indicator ${voted ? "voted" : "not-voted"}`} id="voting-status">{voted ? " have voted": " haven't voted"}</span>
-      </h3>
-      <div className="form-container">
-        <form onSubmit={handleVoteSubmit}>
-          <label className="form-label">
-            Vote for (candidate address):
-          </label>
-          <input className="form-input" type="text" list="candidateAddresses" value={voteInputValue} onChange={handleVoteInputChange} />
-          <datalist id="candidateAddresses">
-            {signers.map(s => 
-              <option key={s} value={s}>{s}</option>
-            )}
-          </datalist>
-          <button className="action-button" type="submit">Vote</button>
-        </form>
-      </div>
-      <WinnerPanel currentWinner={currentWinner} finished={finished} />
-      <CandidatesPanel candidates={candidates} />
-    </div>
-  );
-
-  const finishedPanel = (
-    <div className="wider-column">
-      <h3 id="voting-header" className={started ? (finished ? "finished" : "") : "not-started"}>
-        Voting has finished, you 
-        <span className={`status-indicator ${voted ? "voted" : "not-voted"}`} id="voting-status">{voted ? " have voted": " haven't voted"}</span>
-      </h3>
-      <WinnerPanel currentWinner={currentWinner} finished={finished} />
-      <CandidatesPanel candidates={candidates} />
-    </div>
-  );
 
   return (
     <div className="container">
