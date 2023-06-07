@@ -38,3 +38,24 @@ export function txErrorToHumanReadable(error) {
         return JSON.stringify(error);
     }
 }
+
+export async function makeOperation(operation, setLoading, setErrorMessage) {
+    setLoading(true);
+    try {
+        const result = await operation();
+        setLoading(false);
+        return result;
+    } catch (error) {
+        setLoading(false);
+        console.log(error);
+        setErrorMessage(txErrorToHumanReadable(error));
+    }
+}
+
+export async function makeTransaction(transaction, setLoading, setErrorMessage) {
+    return makeOperation(async () => {
+        const tx = await transaction();
+        return await tx.wait();
+    }, setLoading, setErrorMessage);
+}
+

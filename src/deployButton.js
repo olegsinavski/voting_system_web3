@@ -1,19 +1,15 @@
 import { ethers } from "ethers";
-import { txErrorToHumanReadable } from './utils';
+import { makeOperation } from './utils';
 
 function DeployContractButton({ provider, currentSignerAddress, contractABI, setContractAddress, setLoading, setErrorMessage }) {
   const onDeployNewContract = async () => {
     const signer = provider.getSigner(currentSignerAddress);
     const VotingFactory = new ethers.ContractFactory(contractABI.abi, contractABI.bytecode, signer);
-    try {
-      setLoading(true);
-      const contractInstance = await VotingFactory.deploy();
-      await contractInstance.deployed();
-      setContractAddress(contractInstance.address);
-    } catch (error) {
-      setErrorMessage(txErrorToHumanReadable(error));
-    }
-    setLoading(false);
+    await makeOperation(async () => {
+        const contractInstance = await VotingFactory.deploy();
+        await contractInstance.deployed();
+        setContractAddress(contractInstance.address);
+    }, setLoading, setErrorMessage)
   };
 
   return (

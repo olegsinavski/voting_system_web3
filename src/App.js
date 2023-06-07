@@ -1,7 +1,7 @@
 // import logo from './logo.svg';
 import './App.css';
 
-import { validateAddress, txErrorToHumanReadable } from './utils';
+import { validateAddress, txErrorToHumanReadable, makeTransaction } from './utils';
 import { useState, useEffect } from 'react';
 import { useDisappearingError } from './error';
 import useAdminPanel from "./adminPanel"
@@ -59,16 +59,7 @@ export default function App() {
       setErrorMessage('Invalid candidate address - should be full address');
       return;
     }
-    try {
-        setLoading(true);
-        const tx = await votingSystem.addCandidate(candidateInputValue);
-        const response = await tx.wait();
-        console.log('Add candidate response:', response);
-    } catch(error) {
-        console.log(error)
-        setErrorMessage(txErrorToHumanReadable(error));
-    }
-    setLoading(false);
+    await makeTransaction(() => votingSystem.addCandidate(candidateInputValue), setLoading, setErrorMessage);
     fetchCandidates(votingSystem).then(setCandidates)
   };
 
@@ -106,16 +97,7 @@ export default function App() {
       setErrorMessage('Invalid vote address - should be full address');
       return;
     }
-    try {
-      setLoading(true);
-      const tx = await votingSystem.vote(voteInputValue);
-      const response = await tx.wait();
-      console.log('Voting response:', response);
-    } catch(error) {
-      console.log(error)
-      setErrorMessage(txErrorToHumanReadable(error));
-    }
-    setLoading(false);
+    await makeTransaction(() => votingSystem.vote(voteInputValue), setLoading, setErrorMessage);
     refreshAllVoting(votingSystem, started, finished)
   };
 

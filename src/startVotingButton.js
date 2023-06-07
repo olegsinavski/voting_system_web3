@@ -1,5 +1,5 @@
 
-import { txErrorToHumanReadable } from './utils';
+import { makeTransaction } from './utils';
 
 
 export default function StartStopVotingButton({ 
@@ -7,16 +7,7 @@ export default function StartStopVotingButton({
         refreshStartedFinished, setLoading, setErrorMessage }) {
 
   const onToggleVoting = async () => {
-    try {
-      setLoading(true);
-      const tx = started ? await votingSystem.finishVoting() : await votingSystem.startVoting();
-      const response = await tx.wait();
-      console.log('Transaction response:', response);
-    } catch (error) {
-      console.log(error);
-      setErrorMessage(txErrorToHumanReadable(error));
-    }
-    setLoading(false);
+    await makeTransaction(started ? votingSystem.finishVoting : votingSystem.startVoting, setLoading, setErrorMessage);
     refreshStartedFinished(votingSystem);
   };
 
