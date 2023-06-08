@@ -1,7 +1,15 @@
 import { useState, useEffect } from 'react';
 
-
-
+/**
+ * Custom hook that fetches signers based on the provided provider.
+ * If the provider is not available, it sets the signers array to an empty array.
+ * If the provider is available, it fetches signers either from a single Metamask signer
+ * or from the local provider.
+ *
+ * @param {Object} provider - The provider object.
+ * @returns {Object} - An object containing the signers array, the current signer address,
+ * and a function to set the current signer address.
+ */
 export function useSigners(provider) {
   const [signers, setSigners] = useState([]);
   const [currentSignerAddress, setCurrentSignerAddress] = useState("");
@@ -27,10 +35,16 @@ export function useSigners(provider) {
     fetchSigners();
   }, [provider]);
 
-  return { signers, currentSignerAddress, setCurrentSignerAddress};
-};
+  return { signers, currentSignerAddress, setCurrentSignerAddress };
+}
 
-
+/**
+ * A functional component that renders an identity panel.
+ *
+ * @param {Object} props - The component props containing the signers array,
+ * the current signer address, and a function to set the current signer address.
+ * @returns {JSX.Element} - The rendered component.
+ */
 export function IdentityPanel({ signers, currentSignerAddress, setCurrentSignerAddress }) {
   return (
     <div>

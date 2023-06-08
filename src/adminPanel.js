@@ -9,22 +9,40 @@ import { ErrorPopup } from './error';
 import { useIsOwner, useContract } from './contract';
 import { useSigners } from './signers';
 
+/**
+ * Custom hook for the admin panel functionality.
+ * @param {string} errorMessage - Error message to display.
+ * @param {function} setLoading - Setter function to update loading state.
+ * @param {function} setErrorMessage - Setter function to update error message.
+ * @returns {Array} - Array containing votingSystem, started, finished, signers, and adminPanel.
+ */
 export default function useAdminPanel(
   errorMessage,
   setLoading,
   setErrorMessage,
 ) {
-    
-  const [contractAddress, setContractAddress] = useState("");  
+  // State variables
+  const [contractAddress, setContractAddress] = useState("");
   const [started, setStarted] = useState(false);
   const [finished, setFinished] = useState(false);
   const [useMetaMask, setUseMetaMask] = useState(false);
+
+  // Get provider and network name using custom hook
   const [provider, networkName] = useEthersProvider('http://127.0.0.1:8545', useMetaMask, setErrorMessage);
-  
-  const {signers, currentSignerAddress, setCurrentSignerAddress}  = useSigners(provider);
+
+  // Get signers and current signer address using custom hook
+  const { signers, currentSignerAddress, setCurrentSignerAddress } = useSigners(provider);
+
+  // Get voting system contract using custom hook
   const votingSystem = useContract(provider, currentSignerAddress, contractAddress, contractABI.abi);
+
+  // Check if current signer is the owner of the contract
   const isOwner = useIsOwner(votingSystem, currentSignerAddress);
 
+  /**
+   * Refreshes the started and finished values of the voting system.
+   * @param {object} votingSystem - Instance of the voting system contract.
+   */
   async function refreshStartedFinished(votingSystem) {
     if (!votingSystem) {
       return;
@@ -35,10 +53,12 @@ export default function useAdminPanel(
     setFinished(finishedValue);
   }
 
+  // Refresh started and finished values when votingSystem changes
   useEffect(() => {
     refreshStartedFinished(votingSystem);
   }, [votingSystem]);
 
+  // JSX for the admin panel
   const adminPanel = (
     <div className="narrower-column">
       <div className="narrower-column-internal">
@@ -77,5 +97,6 @@ export default function useAdminPanel(
       </div>
     </div>
   );
+
   return [votingSystem, started, finished, signers, adminPanel];
 };

@@ -1,6 +1,4 @@
-
 import { ethers } from 'ethers';
-
 
 /**
  * Validates an Ethereum address.
@@ -39,6 +37,14 @@ export function txErrorToHumanReadable(error) {
     }
 }
 
+/**
+ * Executes an asynchronous operation and handles loading state and error messages.
+ * 
+ * @param {function} operation - The asynchronous operation to execute.
+ * @param {function} setLoading - A function to set the loading state.
+ * @param {function} setErrorMessage - A function to set the error message.
+ * @returns {Promise<any>} - The result of the operation.
+ */
 export async function makeOperation(operation, setLoading, setErrorMessage) {
     setLoading(true);
     try {
@@ -52,10 +58,17 @@ export async function makeOperation(operation, setLoading, setErrorMessage) {
     }
 }
 
+/**
+ * Executes an Ethereum transaction and handles loading state and error messages.
+ * 
+ * @param {function} transaction - The Ethereum transaction to execute.
+ * @param {function} setLoading - A function to set the loading state.
+ * @param {function} setErrorMessage - A function to set the error message.
+ * @returns {Promise<any>} - The result of the transaction.
+ */
 export async function makeTransaction(transaction, setLoading, setErrorMessage) {
     return makeOperation(async () => {
         const tx = await transaction();
         return await tx.wait();
     }, setLoading, setErrorMessage);
 }
-
