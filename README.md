@@ -18,6 +18,40 @@ OR
 Write a separate script with Ethers.js to interact with the smart contract functions.
 Include a readme file.
 
+<img width="357" alt="metamask confirmation" src="https://github.com/olegsinavski/calyptus_capstone/assets/2086260/d186770c-c76d-4261-8334-fe763794b1a7">
+
+
+# Tutorial 
+
+There are two modes of testing the application: 
+ - by launching the local node: faster response times and no-hassle free experimentation
+ - by using public networks with metamask: realistic usage on etherium test networks or even the full deployment on the mainnet.
+
+We are going to be running the frontend locally. Deployment of this frontend app and the public access is out of the scope for now. 
+
+## Running a local hardhat node
+
+Checkout the repo and run `npm install`. After that you can run hardhat commands.
+The project has many unittests that hopefully cover 100% of the functionality of the app.
+To check that everything is fine, run `npx hardhat test`. You shouldn't see any failures.
+
+Now launch the local node with `hardhat`:
+``` bash
+npx hardhat node
+```
+
+
+```
+npx hardhat compile
+npx hardhat test
+npx hardhat run scripts/deploy.js
+npx hardhat node
+```
+
+
+<img width="1157" alt="adding candidates with metamask" src="https://github.com/olegsinavski/calyptus_capstone/assets/2086260/5ef5efba-ebdc-49c6-b0e8-7bfd7bf672dd">
+
+
 # How to set the repo from scratch
 ```
 npm init
