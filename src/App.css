@@ -1,0 +1,270 @@
+body {
+  background-color: #222;
+  color: #fff;
+  font-family: 'Roboto', sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+.container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+}
+
+.wider-column {
+  flex-basis: calc(66.67% - 100px);
+}
+
+.narrower-column {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  flex-basis: calc(33.33% - 20px);
+  padding: 20px;
+  margin-left: 20px;
+}
+
+.narrower-column-internal {
+  border: 2px solid #fff;
+  border-radius: 5px;
+  box-shadow: -2px 0 4px rgba(0, 0, 0, 0.2);
+  padding: 10px;
+  background-color: #333;
+}
+
+.error-popup {
+  background-color: #f44336;
+  color: #fff;
+  padding: 10px;
+  border-radius: 5px;
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
+
+button {
+  background-color: #4CAF50;
+  color: #fff;
+  border: none;
+  padding: 10px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+  margin-top: 10px;
+}
+
+button:hover {
+  background-color: #3e8e41;
+}
+
+select {
+  padding: 10px;
+  border-radius: 5px;
+  border: none;
+  margin-bottom: 10px;
+}
+
+.candidate-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.candidate-list li {
+  font-size: 18px;
+  margin-bottom: 10px;
+}
+
+
+.candidate-table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+.candidate-table th,
+.candidate-table td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: left;
+}
+
+.candidate-table th {
+  background-color: #020202;
+  font-weight: bold;
+}
+
+.candidate-table td:nth-child(2) {
+  width: 30%;
+}
+
+
+form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.form-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.form-label {
+  display: block;
+  margin-bottom: 10px;
+  text-align: center;
+}
+
+.form-input {
+  width: 400px;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  margin-bottom: 2px;
+}
+
+.centered {
+  text-align: center; /* Centers the text horizontally */
+  font-size: 24px; /* Sets the font size */
+  color: rgb(230, 190, 190); /* Sets the font color */
+  font-family: Arial, sans-serif; /* Sets the font family */
+  margin-top: 20px; /* Adds some top margin */
+  border-bottom: 2px solid #333; /* Adds a border at the bottom */
+  padding-bottom: 10px; /* Adds some padding at the bottom */
+}
+
+#voting-header {
+  text-align: center;
+  font-size: 24px;
+  font-family: Arial, sans-serif;
+  margin-top: 20px;
+  border-bottom: 2px solid #333;
+  padding-bottom: 10px;
+}
+
+.status-indicator {
+  color: orange; /* default color for voting in progress */
+}
+
+#voting-status.finished {
+  color: green; /* color for voting has ended */
+}
+
+#voting-status.not-started {
+  color: red; /* color for voting hasn't started */
+}
+
+.voted {
+  color: #00b894; /* green */
+}
+
+.not-voted {
+  color: #d63031; /* red */
+}
+
+div.winner-container {
+  background-color: #1a1a1a;
+  border: 2px solid #CCCCCC;
+  border-radius: 5px;
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+/* Define styles for the winner heading */
+div.winner-container h3 {
+  font-size: 24px;
+  margin-bottom: 10px;
+  color: #CCCCCC;
+}
+
+/* Define styles for the winner text */
+div.winner-container div.winner-text {
+  font-size: 20px;
+  font-weight: bold;
+  color: #FFFFFF;
+  text-align: center;
+}
+
+/* Define styles for the winner highlight */
+div.winner-container div.winner-highlight {
+  font-size: 26px;
+  font-weight: bold;
+  color: #d93838;
+  text-align: center;
+  margin-top: 10px;
+}
+
+/* Define styles for the no votes message */
+div.winner-container div.no-votes-message {
+  font-size: 18px;
+  font-weight: bold;
+  color: #555555;
+  text-align: center;
+  margin-top: 10px;
+}
+
+.dropbtn {
+  background-color: #4CAF50;
+  color: white;
+  padding: 16px;
+  font-size: 16px;
+  border: none;
+  cursor: pointer;
+}
+
+.provider-selector {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px; /* add margin to bottom to separate from other elements */
+}
+
+.provider-selector label {
+  margin-right: 10px; /* add margin to label to separate from dropdown */
+}
+
+.provider-selector select {
+  padding: 5px; /* add some padding to dropdown to make it look nicer */
+}
+
+.provider-selector select, .provider-selector label {
+  display: inline-block;
+  vertical-align: middle;
+}
+
+
+.loader_overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5); /* semi-transparent black */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.loader_container {
+  position: relative;
+  z-index: 1;
+}
+
+.loader {
+  border: 10px solid #f3f3f3;
+  border-top: 10px solid #4CAF50;
+  border-radius: 50%;
+  width: 80px;
+  height: 80px;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+} 
