@@ -190,6 +190,8 @@ The voting logic implemented in the contract is straightforward and easy to unde
 
 All backend tests for the voting system can be found in `test/VotingSystem.js`. These tests utilize `hardhat` and `chai` to cover various aspects of the contracts and explore different scenarios and edge cases.
 
+Additionally, I ran the contract through a [Forthephy](https://fortephy.readme.io/) security checker.
+
 Some interesting edge cases that are tested include:
 
 - Can an admin start voting without any candidates? (I opted for "no" - the voting cannot start without any candidates.)

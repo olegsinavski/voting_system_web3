@@ -114,6 +114,13 @@ describe("VotingSystem", function () {
 
     });
 
+    it("Add null candidate", async function () {
+      const { votingSystem, owner, otherAccount } = await loadFixture(deployVotingSystem);
+      await expect(votingSystem.addCandidate(ethers.constants.AddressZero)).to.be.revertedWith(
+        "Candidate can't be null"
+      );
+    });
+
 
     it("Can't add two times", async function () {
       const { votingSystem, owner, otherAccount } = await loadFixture(deployVotingSystem);
@@ -148,6 +155,15 @@ describe("VotingSystem", function () {
 
     });
 
+    it("Voting for null", async function () {
+      const { votingSystem, owner, otherAccount } = await loadFixture(deployVotingSystem);
+      await expect(votingSystem.addCandidate(owner.address)).not.to.be.reverted;
+      await expect(votingSystem.startVoting()).not.to.be.reverted;
+      await expect(votingSystem.vote(ethers.constants.AddressZero)).to.be.revertedWith(
+        "Candidate can't be null"
+      );
+    });
+
 
     it("Voting for non-existent", async function () {
       const { votingSystem, owner, otherAccount } = await loadFixture(deployVotingSystem);
@@ -158,6 +174,11 @@ describe("VotingSystem", function () {
       );
 
       await expect(votingSystem.getCandidateVotes(otherAccount.address)).to.be.revertedWith(
+        "Candidate is not registered"
+      );
+
+      // Null candidate shouldn't exist as well
+      await expect(votingSystem.getCandidateVotes(ethers.constants.AddressZero)).to.be.revertedWith(
         "Candidate is not registered"
       );
 
