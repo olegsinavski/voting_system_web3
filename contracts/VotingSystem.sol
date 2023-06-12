@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.9;
+pragma solidity ^0.8.16;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 
@@ -22,8 +22,8 @@ contract VotingSystem is Ownable {
      * Only the contract owner can call this function.
      */
     function startVoting() public onlyOwner {
-        require(finished == false, "Can't start voting second time");
-        require(started == false, "Can't start - voting is in progress");
+        require(!finished, "Can't start voting second time");
+        require(!started, "Can't start - voting is in progress");
         require(getCandidateSize() > 0, "Can't start with 0 candidates");
         started = true;
     }
@@ -33,8 +33,8 @@ contract VotingSystem is Ownable {
      * Only the contract owner can call this function.
      */
     function finishVoting() public onlyOwner {
-        require(finished == false, "Already finished");
-        require(started == true, "Can't finish - voting hasn't started");
+        require(!finished, "Already finished");
+        require(started, "Can't finish - voting hasn't started");
         started = false;
         finished = true;
     }
@@ -45,9 +45,11 @@ contract VotingSystem is Ownable {
      * @param candidate The address of the candidate to add.
      */
     function addCandidate(address candidate) public {
-        require(started == false, "Can't add candidate during voting");
-        require(finished == false, "Can't add candidate after voting is finished");
+        require(candidate != address(0), "Candidate can't be null");
+        require(!started, "Can't add candidate during voting");
+        require(!finished, "Can't add candidate after voting is finished");
         require(candidateVotes[candidate] == 0, "Candidate is already registered");
+        
         candidateVotes[candidate] = 1;
         candidates.push(candidate);
     }
@@ -69,8 +71,9 @@ contract VotingSystem is Ownable {
      * @param candidate The address of the candidate to vote for.
      */
     function vote(address candidate) public {
-        require(started == true, "Voting hasn't started or finished");
-        require(voters[msg.sender] == false, "You already voted");
+        require(candidate != address(0), "Candidate can't be null");
+        require(started, "Voting hasn't started or finished");
+        require(!voters[msg.sender], "You already voted");
         uint256 votes = candidateVotes[candidate];
         require(votes > 0, "Candidate is not registered");
         candidateVotes[candidate] += 1;
@@ -96,7 +99,7 @@ contract VotingSystem is Ownable {
      * @return The address of the current winning candidate.
      */
     function currentWinner() public view returns (address) {
-        require(started == true || finished == true, "Voting hasn't started");
+        require(started || finished, "Voting hasn't started");
         require(winner != address(0), "No votes have been casted");
         return winner;
     }
