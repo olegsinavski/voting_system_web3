@@ -1,6 +1,8 @@
 # Voting system Web3 App
 
-<img width="1220" alt="Voting app demo" src="https://github.com/olegsinavski/calyptus_capstone/assets/2086260/aa82ca35-f858-42b3-93d7-2736451d72a6">
+<div align="center">
+  <img width="1220" alt="Voting app demo" src="https://github.com/olegsinavski/calyptus_capstone/assets/2086260/aa82ca35-f858-42b3-93d7-2736451d72a6">
+</div>
 
 Features:
  - full implementation of web3 app demoing the voting process
@@ -69,13 +71,18 @@ You can now view calyptus_capstone in the browser.
 ## Deploying a new contract
 
 Navigate to `http://localhost:3000`. You should see the black page with the admin panel floating on the right:
-<img width="811" alt="start admin panel" src="https://github.com/olegsinavski/calyptus_capstone/assets/2086260/a34c1949-7baa-41d6-9bb9-c300549c12f8">
+<div style="text-align: center;">
+  <img width="811" alt="start admin panel" src="https://github.com/olegsinavski/calyptus_capstone/assets/2086260/a34c1949-7baa-41d6-9bb9-c300549c12f8">
+</div>
 
 `Provider` allows you to select "local" or public "metamask" mode. Do not change it for this "local node" section.
 `Select identity` selector allows you to pick one of the test accounts created by the `hardhat` node. You don't have to change it for now.
 
 Click `Deploy new voting system` button. This deploys a new instance of the Voting contract on a local hardhat node:
-<img width="1169" alt="New voting system deployed" src="https://github.com/olegsinavski/calyptus_capstone/assets/2086260/e5d58dd5-6d26-4daf-8ba6-ba9a466149f7">
+<div style="text-align: center;">
+  <img width="1169" alt="New voting system deployed" src="https://github.com/olegsinavski/calyptus_capstone/assets/2086260/e5d58dd5-6d26-4daf-8ba6-ba9a466149f7">
+</div>
+
 
 The idenitity used to deploy the contract becomes its "Admin". Notice that you can change your identity in the admin panel - this emulates access to this web3 app from different participants. When you select an "Admin" address, the panel displays `You are the admin` which allows the admin to perform certain extra action.
 
@@ -85,7 +92,9 @@ Currently, it is in a "NOT STARTED" state: people can add candidates but can not
 You can copy some address into `Add candidate address` box from hardhat node logs (or select some from the appearing suggestion list)
 and click `Add` button. This adds the selected candidate to `Candidates` table below. Go ahead and add a few different ones:
 
+<div style="text-align: center;">
 <img width="693" alt="Added several candidates" src="https://github.com/olegsinavski/calyptus_capstone/assets/2086260/1a6ebb93-a992-4732-a364-ff2bbbe27cc7">
+</div>
 
 You can add candidates using any identity in the Admin panel, but when you done select the admin address you used to deploy the contract.
 This should make `Start voting!` button visible. Click this button to start the voting.
@@ -93,37 +102,45 @@ This should make `Start voting!` button visible. Click this button to start the 
 ## Voting
 
 Now the application is in the "STARTED" state. Instead of adding the candidates, you can use the `Vote for` box to vote for one of the candidates in the table:
+<div style="text-align: center;">
 <img width="696" alt="image" src="https://github.com/olegsinavski/calyptus_capstone/assets/2086260/a09b4c25-956c-40cf-a4ef-71fcfe755bc4">
+</div>
 
 Notice that one address (identity in the admin panel) can vote only once. If you attempt to vote again, an error window will appear:
-<p align="center">
+<div style="text-align: center;">
 <img width="425" alt="image" src="https://github.com/olegsinavski/calyptus_capstone/assets/2086260/a5a53597-c0fe-45cc-99f1-a90f8e770f16">
  </p>
+ </div>
 
 Go ahead and change idenitites few times and vote for other candidates:
+<div style="text-align: center;">
 <img width="696" alt="image" src="https://github.com/olegsinavski/calyptus_capstone/assets/2086260/7b8bec52-4a15-4b50-b81d-5e63a1108b2a">
+ </div>
 
 Everytime anyone votes, the contract recomputes the current winner.
 
 ## Finish the voting
 
 Select the admin address in the admin panel so that `Finish voting` button becomes visible and click it.
-
+<div style="text-align: center;">
 <img width="695" alt="image" src="https://github.com/olegsinavski/calyptus_capstone/assets/2086260/3d5cceb5-42ab-4a95-b947-b605558e4e84">
+ </div>
 
 The applications is in its final "FINISHED" state. Everyone can see the winner address and the voting results.
 
 ## Running via metamask
 
 Reload the page, select "Metamask" in the `Provider` selection combobox in the admin panel. Metamask window should pop-up asking for a connection confirmation:
-<p align="center">
+<div style="text-align: center;">
 <img width="357" alt="metamask confirmation" src="https://github.com/olegsinavski/calyptus_capstone/assets/2086260/d186770c-c76d-4261-8334-fe763794b1a7">
-</p>
+ </div>
 
 To demo the app, you select some test etherium network (e.g. Sepolia), although nothing stops you from deploying the contract on the main net.
 Now the workflow is the same, except that for every state-writing transaction (e.g. adding a candidate) a MetaMask window will pop up to approve the gas spendature:
 
+<div style="text-align: center;">
 <img width="1265" alt="image" src="https://github.com/olegsinavski/calyptus_capstone/assets/2086260/e182ab5b-6637-4ddd-88a6-16c7193c10d8">
+ </div>
 
 # Code organization
 
