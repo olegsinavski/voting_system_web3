@@ -125,13 +125,39 @@ Now the workflow is the same, except that for every state-writing transaction (e
 
 <img width="1265" alt="image" src="https://github.com/olegsinavski/calyptus_capstone/assets/2086260/e182ab5b-6637-4ddd-88a6-16c7193c10d8">
 
-# Code tutorial
+# Code organization
 
+## Voting system contract
 
+The main contract that implements the voting logic is `contracts/VotingSystem.sol`. 
+It stores necessary information needed to implement voting logic:
+ - it tracks the state of the process with `started/finished` flags
+ - tracks candidate votes in `candidateVotes` mapping
+ - since you can only vote once, it tracks `voters`
+ - a winner is cheaply recomputed on every vote and stored in `winnerVotes` and `winner`
+ - additionally, `candidates` are stored just for the sake of the visualization since we can't iterate through keys of the `candidateVotes` map in solidity
 
+The actual voting logic is very simple and self-explainatory.
 
+## Voting system tests
 
+All backedn tests are in `test/VotingSystem.js`. Using `hardhat` and `chai` I test all aspects of the contracts and (hopefully) all possible scenarious and edgecases.
 
+Few interesting edgecases are:
+ - can an admin start voting without any candidates? (I opted for "no")
+ - what to do when number of votes is equal? (I opted for "first who got it is the winner")
+ - can you finish the voting without any votes? (Yes, but winner will be nil)
+ - can you restart the voting after its done? (No, you have to recreated the contract - every voting has to be saved for eternity!)
+
+## Frontend code
+
+The code is in `src`. I haven't had any experience with React before, so don't judge me too harshly. Also I haven't really used javascript much before.
+In fact, learning React and writing the frontend took me 90% of the development time for this project:)
+
+I tried to extract React components and carefully use state functors in React, but I'm not yet quite happy about the code structure:
+ - it is still too convoluted for my taste (state goes all over the place)
+ - there is no very clear separation between GUI and the logic really (but maybe this is how its supposed to be done here?)
+ - and finally, the major flaw is that there are no front end tests :(
 
 # Misc HOW-TOs
 ## Basic hardhat commands
