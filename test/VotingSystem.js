@@ -227,13 +227,13 @@ describe("VotingSystem", function () {
       await expect(votingSystem.startVoting()).not.to.be.reverted;
 
       await expect(votingSystem.currentWinner()).to.be.revertedWith(
-        "No votes has been casted"
+        "No votes have been casted"
       );
 
       await expect(votingSystem.finishVoting()).not.to.be.reverted;
 
       await expect(votingSystem.currentWinner()).to.be.revertedWith(
-        "No votes has been casted"
+        "No votes have been casted"
       );
     });
     
