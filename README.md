@@ -5,13 +5,14 @@
 </p>
 
 Features:
- - full implementation of web3 app demoing the voting process
- - Etherium backend with a contract in Solidity 
- - Hardhat-based development evironment
- - (Hopefully) complete unittesting of the backend contract
- - Web frontend in JS with React and ethers.js 
+- Full implementation of a web3 app demonstrating the voting process.
+- Ethereum backend with a contract in Solidity.
+- Hardhat-based development evironment
+- (Hopefully) Complete unit testing of the backend contract.
+- Web frontend in JavaScript using React and ethers.js.
 
-Here is a task taken from [Calyptus](https://calyptus.co/) Web3 education platform:
+Here is a task description taken from the [Calyptus](https://calyptus.co/) Web3 education platform.
+
 
 ```
 ## Smart Contract
@@ -36,23 +37,42 @@ Include a readme file.
 
 # Web app tutorial 
 
-There are two modes of testing the application: 
- - by launching the local node: faster response times and no-hassle free experimentation
- - by using public networks with metamask: realistic usage on etherium test networks or even the full deployment on the mainnet.
+There are two modes available for testing the application:
+ - Launching the local node: This mode provides faster response times and allows hassle and money-free experimentation.
+ - Using public networks with MetaMask: This mode enables realistic usage on Ethereum test networks or even the full deployment on the mainnet.
 
-We are going to be running the frontend locally. Deployment of this frontend app and the public access is out of the scope for now. 
+We will be running the frontend locally. The deployment of this frontend app and public access are out of the scope for now.
+
+## Setup the repo
+
+Clone the repository by running the following command:
+  ```bash
+  git clone https://github.com/olegsinavski/calyptus_capstone
+  ```
+
+Change to the project directory:
+  ```bash
+  cd calyptus_capstone
+  ```
+
+Install the required dependencies using npm:
+  ```bash
+  npm install
+  ```
+
+To run the project's unit tests and ensure everything is functioning correctly, run the following:
+  ```bash
+  npx hardhat test
+  ```
 
 ## Running a local hardhat node
 
-Checkout the repo, `cd calyptus_capstone` and run `npm install`. After that you can run hardhat commands.
-The project has many unittests that hopefully cover 100% of the functionality of the app.
-To check that everything is fine, run `npx hardhat test`. You shouldn't see any failures.
-
-Now `cd calyptus_capstone` and launch the local node with `hardhat` in a separate terminal:
-``` bash
+Launch a local Ethereum node using Hardhat in a separate terminal:
+```bash
 npx hardhat node
 ```
-You should see several very rich test accounts created.
+
+This will start the local node, and you should see the creation of several test accounts with preloaded funds.
 
 ## Running the frontend
 
@@ -60,7 +80,7 @@ In a separate terminal, again `cd calyptus_capstone` and run:
 ```bash
 npm start
 ```
-This should print out something like that:
+This should print out something like this:
 ```
 You can now view calyptus_capstone in the browser.
 
@@ -70,100 +90,113 @@ You can now view calyptus_capstone in the browser.
 
 ## Deploying a new contract
 
-Navigate to `http://localhost:3000`. You should see the black page with the admin panel floating on the right:
+To deploy a new contract, follow these steps:
+
+Open your web browser and navigate to http://localhost:3000. You will see a black page with the admin panel floating on the right-hand side.
 <p align="center">
   <img width="811" alt="start admin panel" src="https://github.com/olegsinavski/calyptus_capstone/assets/2086260/a34c1949-7baa-41d6-9bb9-c300549c12f8">
 </p>
 
-`Provider` allows you to select "local" or public "metamask" mode. Do not change it for this "local node" section.
-`Select identity` selector allows you to pick one of the test accounts created by the `hardhat` node. You don't have to change it for now.
+In the admin panel, locate the Provider dropdown menu. It allows you to select between "local" and public "Metamask". Do not change it for this "local node" tutorial.
+Next, find the Select identity selector in the admin panel. This allows you to choose one of the test accounts created by the hardhat node. For now, there is no need to change this selection.
 
-Click `Deploy new voting system` button. This deploys a new instance of the Voting contract on a local hardhat node:
+Click on the "Deploy new voting system" button. This action will deploy a new instance of the Voting contract on a local hardhat node.
 <p align="center">
   <img width="1169" alt="New voting system deployed" src="https://github.com/olegsinavski/calyptus_capstone/assets/2086260/e5d58dd5-6d26-4daf-8ba6-ba9a466149f7">
 </p>
 
 
-The idenitity used to deploy the contract becomes its "Admin". Notice that you can change your identity in the admin panel - this emulates access to this web3 app from different participants. When you select an "Admin" address, the panel displays `You are the admin` which allows the admin to perform certain extra action.
+The identity used to deploy the contract will become its "Admin". Note that you can change your identity in the admin panel, which simulates access to this web3 app from different participants. When you select an "Admin" address, the panel will display the message "You are the admin", providing the admin with certain additional actions they can perform.
 
 ## Adding candidates
 
-Currently, it is in a "NOT STARTED" state: people can add candidates but can not cast votes yet.
-You can copy some address into `Add candidate address` box from hardhat node logs (or select some from the appearing suggestion list)
-and click `Add` button. This adds the selected candidate to `Candidates` table below. Go ahead and add a few different ones:
+The current state of the system is "NOT STARTED," which means people can add candidates but cannot cast votes yet. Follow these steps to add candidates:
+Locate the "Add candidate address" box in the Admin panel. You can copy an address from the hardhat node logs or select one from the suggested list that appears.
+
+Paste the candidate's address into the "Add candidate address" box and click the "Add" button. This will add the selected candidate to the "Candidates" table below. Feel free to add several different candidates.
 
 <p align="center">
 <img width="693" alt="Added several candidates" src="https://github.com/olegsinavski/calyptus_capstone/assets/2086260/1a6ebb93-a992-4732-a364-ff2bbbe27cc7">
 </p>
 
-You can add candidates using any identity in the Admin panel, but when you done select the admin address you used to deploy the contract.
-This should make `Start voting!` button visible. Click this button to start the voting.
+You can add candidates using any identity in the Admin panel. However, once you are done, select the admin address you used to deploy the contract. This action will make the "Start voting!" button visible.
+Click the "Start voting!" button to begin the voting process.
 
 ## Voting
 
-Now the application is in the "STARTED" state. Instead of adding the candidates, you can use the `Vote for` box to vote for one of the candidates in the table:
+The application is now in the "STARTED" state. Instead of adding candidates, you can use the "Vote for" box to cast your vote for one of the candidates in the table:
 <p align="center">
 <img width="696" alt="image" src="https://github.com/olegsinavski/calyptus_capstone/assets/2086260/a09b4c25-956c-40cf-a4ef-71fcfe755bc4">
 </p>
 
-Notice that one address (identity in the admin panel) can vote only once. If you attempt to vote again, an error window will appear:
+Please note that each address (identity in the admin panel) can vote only once. If you attempt to vote again, an error window will appear:
 <p align="center">
 <img width="425" alt="image" src="https://github.com/olegsinavski/calyptus_capstone/assets/2086260/a5a53597-c0fe-45cc-99f1-a90f8e770f16">
 </p>
 
-Go ahead and change idenitites few times and vote for other candidates:
+Feel free to change identities a few times and vote for different candidates:
 <p align="center">
 <img width="696" alt="image" src="https://github.com/olegsinavski/calyptus_capstone/assets/2086260/7b8bec52-4a15-4b50-b81d-5e63a1108b2a">
 </p>
 
-Everytime anyone votes, the contract recomputes the current winner.
+Every time a vote is cast, the contract will recompute the current winner.
 
 ## Finish the voting
 
-Select the admin address in the admin panel so that `Finish voting` button becomes visible and click it.
+To complete the voting process, follow these steps:
+In the admin panel, select the admin address. This action will make the "Finish voting" button visible.
+
 <p align="center">
 <img width="695" alt="image" src="https://github.com/olegsinavski/calyptus_capstone/assets/2086260/3d5cceb5-42ab-4a95-b947-b605558e4e84">
 </p>
 
-The applications is in its final "FINISHED" state. Everyone can see the winner address and the voting results.
+Click the "Finish voting" button.
+
+The application will transition to the final "FINISHED" state. At this point, everyone can view the winner's address and the voting results.
 
 ## Running via metamask
 
-Reload the page, select "Metamask" in the `Provider` selection combobox in the admin panel. Metamask window should pop-up asking for a connection confirmation:
+To run the application using Metamask, follow these steps:
+
+Reload the page and select "Metamask" from the Provider selection dropdown in the admin panel. A Metamask window will pop up, asking for confirmation to connect with your identity:
+
 <p align="center">
 <img width="357" alt="metamask confirmation" src="https://github.com/olegsinavski/calyptus_capstone/assets/2086260/d186770c-c76d-4261-8334-fe763794b1a7">
 </p>
 
-To demo the app, you select some test etherium network (e.g. Sepolia), although nothing stops you from deploying the contract on the main net.
-Now the workflow is the same, except that for every state-writing transaction (e.g. adding a candidate) a MetaMask window will pop up to approve the gas spendature:
+To demonstrate the app, you can select a test Ethereum network (e.g., Sepolia). However, if desired, you can also deploy the contract on the mainnet.
+
+The workflow remains the same, except that for each state-writing transaction (e.g., adding a candidate), a Metamask window will pop up to approve the gas expenditure.
 
 <p align="center">
 <img width="1265" alt="image" src="https://github.com/olegsinavski/calyptus_capstone/assets/2086260/e182ab5b-6637-4ddd-88a6-16c7193c10d8">
 </p>
 
-# Code organization
+# Code structure
 
 ## Voting system contract
 
-The main contract that implements the voting logic is `contracts/VotingSystem.sol`. 
-It stores necessary information needed to implement voting logic:
- - it tracks the state of the process with `started/finished` flags
- - tracks candidate votes in `candidateVotes` mapping
- - since you can only vote once, it tracks `voters`
- - a winner is cheaply recomputed on every vote and stored in `winnerVotes` and `winner`
- - additionally, `candidates` are stored just for the sake of the visualization since we can't iterate through keys of the `candidateVotes` map in solidity
+The contract that handles the voting logic is located at `contracts/VotingSystem.sol`. This contract contains the necessary information required to implement the voting process:
 
-The actual voting logic is very simple and self-explainatory.
+ - It keeps track of the state of the voting process using `started/finished` flags.
+ - The contract maintains a mapping called `candidateVotes` to track the votes received by each candidate.
+ - To ensure that each voter can only vote once, the contract keeps a record of `voters`.
+ - The contract efficiently recomputes and stores the winner on every vote using `winnerVotes` and `winner` variables.
+ - Additionally, the `candidates` are stored separately to facilitate visualization since it is not possible to iterate through the keys of the `candidateVotes` mapping in Solidity.
 
-## Voting system tests
+The voting logic implemented in the contract is straightforward and easy to understand.
 
-All backedn tests are in `test/VotingSystem.js`. Using `hardhat` and `chai` I test all aspects of the contracts and (hopefully) all possible scenarious and edgecases.
+## Voting System Tests
 
-Few interesting edgecases are:
- - can an admin start voting without any candidates? (I opted for "no")
- - what to do when number of votes is equal? (I opted for "first who got it is the winner")
- - can you finish the voting without any votes? (Yes, but winner will be nil)
- - can you restart the voting after its done? (No, you have to recreated the contract - every voting has to be saved for eternity!)
+All backend tests for the voting system can be found in `test/VotingSystem.js`. These tests utilize `hardhat` and `chai` to cover various aspects of the contracts and explore different scenarios and edge cases.
+
+Some interesting edge cases that are tested include:
+
+- Can an admin start voting without any candidates? (I opted for "no" - the voting cannot start without any candidates.)
+- How should the system handle cases where the number of votes is equal? (Currently, the candidate who received the first vote is declared the winner in such cases. But its probably better to randomize this.)
+- Is it possible to finish the voting without any votes? (Yes, it is possible, but the winner will be `nil` since no votes were cast.)
+- Can the voting be restarted after it is already done? (No, the voting cannot be restarted. If you want to conduct another round of voting, you need to create a new contract. Each voting process must be preserved for eternity!)
+
 
 ## Frontend code
 
