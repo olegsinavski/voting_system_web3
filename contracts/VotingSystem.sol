@@ -1,13 +1,10 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.9;
 
-// Uncomment this line to use console.log
-// import "hardhat/console.sol";
-
 import "@openzeppelin/contracts/access/Ownable.sol";
 
 contract VotingSystem is Ownable {
-    mapping(address => uint) public candidateVotes;
+    mapping(address => uint256) public candidateVotes;
     mapping(address => bool) voters;
     uint256 public winnerVotes;
     address public winner;
@@ -15,12 +12,15 @@ contract VotingSystem is Ownable {
     bool public started;
     bool public finished;
 
+    // needed for the web app because we can't iterate through keys of the candidateVotes map in solidity
     address[] public candidates;
 
-    constructor() Ownable() {
+    constructor() Ownable() {}
 
-    }
-
+    /**
+     * @dev Starts the voting process.
+     * Only the contract owner can call this function.
+     */
     function startVoting() public onlyOwner {
         require(finished == false, "Can't start voting second time");
         require(started == false, "Can't start - voting is in progress");
@@ -28,6 +28,10 @@ contract VotingSystem is Ownable {
         started = true;
     }
 
+    /**
+     * @dev Finishes the voting process.
+     * Only the contract owner can call this function.
+     */
     function finishVoting() public onlyOwner {
         require(finished == false, "Already finished");
         require(started == true, "Can't finish - voting hasn't started");
@@ -35,6 +39,11 @@ contract VotingSystem is Ownable {
         finished = true;
     }
 
+    /**
+     * @dev Adds a new candidate to the list.
+     * Only the contract owner can call this function.
+     * @param candidate The address of the candidate to add.
+     */
     function addCandidate(address candidate) public {
         require(started == false, "Can't add candidate during voting");
         require(finished == false, "Can't add candidate after voting is finished");
@@ -43,12 +52,22 @@ contract VotingSystem is Ownable {
         candidates.push(candidate);
     }
 
-    function getCandidateVotes(address candidate) public view returns(uint256){
+    /**
+     * @dev Returns the number of votes received by a candidate.
+     * @param candidate The address of the candidate.
+     * @return The number of votes received.
+     */
+    function getCandidateVotes(address candidate) public view returns (uint256) {
         uint256 votes = candidateVotes[candidate];
         require(votes > 0, "Candidate is not registered");
         return votes - 1;
     }
 
+    /**
+     * @dev Allows a voter to cast their vote for a candidate.
+     * Can only be called during the voting period.
+     * @param candidate The address of the candidate to vote for.
+     */
     function vote(address candidate) public {
         require(started == true, "Voting hasn't started or finished");
         require(voters[msg.sender] == false, "You already voted");
@@ -64,22 +83,38 @@ contract VotingSystem is Ownable {
         }
     }
 
-    function voted() public view returns(bool) {
+    /**
+     * @dev Checks if the caller has voted.
+     * @return A boolean indicating whether the caller has voted or not.
+     */
+    function voted() public view returns (bool) {
         return voters[msg.sender];
     }
 
-    function currentWinner() public view returns(address) {
+    /**
+     * @dev Returns the address of the current winning candidate.
+     * @return The address of the current winning candidate.
+     */
+    function currentWinner() public view returns (address) {
         require(started == true || finished == true, "Voting hasn't started");
-        require(winner != address(0), "No votes has been casted");
+        require(winner != address(0), "No votes have been casted");
         return winner;
     }
 
+    /**
+     * @dev Returns the number of candidates in the election.
+     * @return The number of candidates.
+     */
     function getCandidateSize() public view returns (uint256) {
         return candidates.length;
     }
 
+    /**
+     * @dev Returns the address of the candidate at the specified index.
+     * @param i The index of the candidate.
+     * @return The address of the candidate.
+     */
     function getCandidate(uint256 i) public view returns (address) {
         return candidates[i];
     }
-
 }
