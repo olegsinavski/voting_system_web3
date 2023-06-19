@@ -47,12 +47,12 @@ We will be running the frontend locally. The deployment of this frontend app and
 
 Clone the repository by running the following command:
   ```bash
-  git clone https://github.com/olegsinavski/calyptus_capstone
+  git clone https://github.com/olegsinavski/voting_system_web3
   ```
 
 Change to the project directory:
   ```bash
-  cd calyptus_capstone
+  cd voting_system_web3
   ```
 
 Install the required dependencies using npm:
@@ -76,13 +76,13 @@ This will start the local node, and you should see the creation of several test 
 
 ## Running the frontend
 
-In a separate terminal, again `cd calyptus_capstone` and run:
+In a separate terminal, again `cd voting_system_web3` and run:
 ```bash
 npm start
 ```
 This should print out something like this:
 ```
-You can now view calyptus_capstone in the browser.
+You can now view voting_system_web3 in the browser.
 
   Local:            http://localhost:3000
   On Your Network:  http://192.168.0.14:3000

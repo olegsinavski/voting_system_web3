@@ -1,16 +1,16 @@
 {
-  "name": "calyptus_capstone",
+  "name": "voting_system_web3",
   "version": "1.0.0",
   "private": true,
   "description": "Write a smart contract that implements a voting system, with functions to - add candidates,  - start the voting process by admin, - vote for a candidate,  - end the voting process by admin, - retrieve the number of votes for each candidate, - retrieve the winning candidate.",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/olegsinavski/calyptus_capstone.git"
+    "url": "git+https://github.com/olegsinavski/voting_system_web3.git"
   },
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/olegsinavski/calyptus_capstone/issues"
+    "url": "https://github.com/olegsinavski/voting_system_web3/issues"
   },
   "dependencies": {
     "@testing-library/jest-dom": "^5.16.5",
