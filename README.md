@@ -1,7 +1,7 @@
 # Voting system Web3 App
 
 <p align="center">
-  <img width="1220" alt="Voting app demo" src="https://github.com/olegsinavski/calyptus_capstone/assets/2086260/aa82ca35-f858-42b3-93d7-2736451d72a6">
+  <img width="1220" alt="Voting app demo" src="https://github.com/olegsinavski/voting_system_web3/assets/2086260/aa82ca35-f858-42b3-93d7-2736451d72a6">
 </p>
 
 Features:
@@ -94,7 +94,7 @@ To deploy a new contract, follow these steps:
 
 Open your web browser and navigate to http://localhost:3000. You will see a black page with the admin panel floating on the right-hand side.
 <p align="center">
-  <img width="811" alt="start admin panel" src="https://github.com/olegsinavski/calyptus_capstone/assets/2086260/a34c1949-7baa-41d6-9bb9-c300549c12f8">
+  <img width="811" alt="start admin panel" src="https://github.com/olegsinavski/voting_system_web3/assets/2086260/a34c1949-7baa-41d6-9bb9-c300549c12f8">
 </p>
 
 In the admin panel, locate the Provider dropdown menu. It allows you to select between "local" and public "Metamask". Do not change it for this "local node" tutorial.
@@ -102,7 +102,7 @@ Next, find the Select identity selector in the admin panel. This allows you to c
 
 Click on the "Deploy new voting system" button. This action will deploy a new instance of the Voting contract on a local hardhat node.
 <p align="center">
-  <img width="1169" alt="New voting system deployed" src="https://github.com/olegsinavski/calyptus_capstone/assets/2086260/e5d58dd5-6d26-4daf-8ba6-ba9a466149f7">
+  <img width="1169" alt="New voting system deployed" src="https://github.com/olegsinavski/voting_system_web3/assets/2086260/e5d58dd5-6d26-4daf-8ba6-ba9a466149f7">
 </p>
 
 
@@ -116,7 +116,7 @@ Locate the "Add candidate address" box in the Admin panel. You can copy an addre
 Paste the candidate's address into the "Add candidate address" box and click the "Add" button. This will add the selected candidate to the "Candidates" table below. Feel free to add several different candidates.
 
 <p align="center">
-<img width="693" alt="Added several candidates" src="https://github.com/olegsinavski/calyptus_capstone/assets/2086260/1a6ebb93-a992-4732-a364-ff2bbbe27cc7">
+<img width="693" alt="Added several candidates" src="https://github.com/olegsinavski/voting_system_web3/assets/2086260/1a6ebb93-a992-4732-a364-ff2bbbe27cc7">
 </p>
 
 You can add candidates using any identity in the Admin panel. However, once you are done, select the admin address you used to deploy the contract. This action will make the "Start voting!" button visible.
@@ -126,17 +126,17 @@ Click the "Start voting!" button to begin the voting process.
 
 The application is now in the "STARTED" state. Instead of adding candidates, you can use the "Vote for" box to cast your vote for one of the candidates in the table:
 <p align="center">
-<img width="696" alt="image" src="https://github.com/olegsinavski/calyptus_capstone/assets/2086260/a09b4c25-956c-40cf-a4ef-71fcfe755bc4">
+<img width="696" alt="image" src="https://github.com/olegsinavski/voting_system_web3/assets/2086260/a09b4c25-956c-40cf-a4ef-71fcfe755bc4">
 </p>
 
 Please note that each address (identity in the admin panel) can vote only once. If you attempt to vote again, an error window will appear:
 <p align="center">
-<img width="425" alt="image" src="https://github.com/olegsinavski/calyptus_capstone/assets/2086260/a5a53597-c0fe-45cc-99f1-a90f8e770f16">
+<img width="425" alt="image" src="https://github.com/olegsinavski/voting_system_web3/assets/2086260/a5a53597-c0fe-45cc-99f1-a90f8e770f16">
 </p>
 
 Feel free to change identities a few times and vote for different candidates:
 <p align="center">
-<img width="696" alt="image" src="https://github.com/olegsinavski/calyptus_capstone/assets/2086260/7b8bec52-4a15-4b50-b81d-5e63a1108b2a">
+<img width="696" alt="image" src="https://github.com/olegsinavski/voting_system_web3/assets/2086260/7b8bec52-4a15-4b50-b81d-5e63a1108b2a">
 </p>
 
 Every time a vote is cast, the contract will recompute the current winner.
@@ -147,7 +147,7 @@ To complete the voting process, follow these steps:
 In the admin panel, select the admin address. This action will make the "Finish voting" button visible.
 
 <p align="center">
-<img width="695" alt="image" src="https://github.com/olegsinavski/calyptus_capstone/assets/2086260/3d5cceb5-42ab-4a95-b947-b605558e4e84">
+<img width="695" alt="image" src="https://github.com/olegsinavski/voting_system_web3/assets/2086260/3d5cceb5-42ab-4a95-b947-b605558e4e84">
 </p>
 
 Click the "Finish voting" button.
@@ -161,7 +161,7 @@ To run the application using Metamask, follow these steps:
 Reload the page and select "Metamask" from the Provider selection dropdown in the admin panel. A Metamask window will pop up, asking for confirmation to connect with your identity:
 
 <p align="center">
-<img width="357" alt="metamask confirmation" src="https://github.com/olegsinavski/calyptus_capstone/assets/2086260/d186770c-c76d-4261-8334-fe763794b1a7">
+<img width="357" alt="metamask confirmation" src="https://github.com/olegsinavski/voting_system_web3/assets/2086260/d186770c-c76d-4261-8334-fe763794b1a7">
 </p>
 
 To demonstrate the app, you can select a test Ethereum network (e.g., Sepolia). However, if desired, you can also deploy the contract on the mainnet.
@@ -169,7 +169,7 @@ To demonstrate the app, you can select a test Ethereum network (e.g., Sepolia). 
 The workflow remains the same, except that for each state-writing transaction (e.g., adding a candidate), a Metamask window will pop up to approve the gas expenditure.
 
 <p align="center">
-<img width="1265" alt="image" src="https://github.com/olegsinavski/calyptus_capstone/assets/2086260/e182ab5b-6637-4ddd-88a6-16c7193c10d8">
+<img width="1265" alt="image" src="https://github.com/olegsinavski/voting_system_web3/assets/2086260/e182ab5b-6637-4ddd-88a6-16c7193c10d8">
 </p>
 
 # Code structure
